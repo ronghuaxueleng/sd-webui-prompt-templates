@@ -1,0 +1,10 @@
+[
+  {
+    "prompt": "(RAW photo, best quality:1.1),(realistic, photo-realistic:1.3),best quality,masterpiece,unity,extremely detailed CG unity 8k wallpaper,ultra-detailed,black high set hair,sweet and charming smile,delicate and beautiful fair skin,high nose bridge,sexy lips,flowing and smooth hair,sunshine,extremely delicate hair,soft temperament,(high set hair:1.1),1girl,fine facial features,hair over shoulder,brown hair,((bright and clean skin)),((facing viewer)),((((full_body)))),(((standing))),<lora:ronghua_20230801104539-000004:0.6>",
+    "NegativePrompt": "(low quality, worst quality:1.5), bad-image-v2-39000,bad_prompt_version2, EasyNegativeV2, ugly, blemish,blush,bad-artist, ng_deepnegative_v1_75t"
+  },
+  {
+    "prompt": "(RAW photo, best quality:1.1),(realistic, photo-realistic:1.3),best quality,masterpiece,unity,extremely detailed CG unity 8k wallpaper,ultra-detailed,black high set hair,sweet and charming smile,delicate and beautiful fair skin,high nose bridge,sexy lips,flowing and smooth hair,sunshine,extremely delicate hair,soft temperament,(high set hair:1.1),1girl,fine facial features,hair over shoulder,brown hair,((bright and clean skin)),((facing viewer)),((((full_body)))),(((standing))),<lora:ronghua_20230801104539-000004:0.6>",
+    "NegativePrompt": "(low quality, worst quality:1.5), bad-image-v2-39000,bad_prompt_version2, EasyNegativeV2, ugly, blemish,blush,bad-artist, ng_deepnegative_v1_75t"
+  }
+]
