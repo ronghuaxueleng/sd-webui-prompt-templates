@@ -15,7 +15,9 @@ def loadjsonfile(template_path):
         template_values = []
         for template_dict in templates:
             temp_list = list(template_dict.values())
-            temp_list.append("<a href='http://www.baidu.com'>dss</a>")
+            buttons = ("<div><button class='secondary gradio-button svelte-cmf5ev'>详情</button></div>"
+                       "<div><button class='secondary gradio-button svelte-cmf5ev'>发送到文生图</button></div>")
+            temp_list.append(buttons)
             template_values.append(temp_list)
         return template_values
 
@@ -36,6 +38,9 @@ def add_tab():
                                              datatype=["str", "str", "html"],
                                              interactive=False,
                                              wrap=True,
+                                             max_rows=10,
+                                             show_label=True,
+                                             overflow_row_behaviour="show_ends",
                                              value=loadjsonfile(template_path),
                                              elem_id="prompt_template_list"
                                              )
