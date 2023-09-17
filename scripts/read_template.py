@@ -1,4 +1,5 @@
 import json
+import base64
 
 import gradio as gr
 
@@ -17,11 +18,12 @@ def loadjsonfile(template_path):
             temp_list = list()
             temp_list.append(template_dict['prompt'])
             temp_list.append(template_dict['NegativePrompt'])
+            raw_encode = base64.b64encode(template_dict['raw'].encode("utf-8"))
             buttons = ("<div style='margin-top: 3px; text-align: center;'>"
                        "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev'>详情</button>"
                        "</div>"
                        "<div style='margin-top: 3px; text-align: center;'>"
-                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev'>发送到文生图</button>"
+                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='prompt_send_to_txt2img(\'"+raw_encode.decode('utf-8')+"\')'>发送到文生图</button>"
                        "</div>")
             temp_list.append(buttons)
             template_values.append(temp_list)
