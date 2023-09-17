@@ -14,9 +14,15 @@ def loadjsonfile(template_path):
         templates = json.loads(f.read())
         template_values = []
         for template_dict in templates:
-            temp_list = list(template_dict.values())
-            buttons = ("<div><button class='secondary gradio-button svelte-cmf5ev'>详情</button></div>"
-                       "<div><button class='secondary gradio-button svelte-cmf5ev'>发送到文生图</button></div>")
+            temp_list = list()
+            temp_list.append(template_dict['prompt'])
+            temp_list.append(template_dict['NegativePrompt'])
+            buttons = ("<div style='margin-top: 3px; text-align: center;'>"
+                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev'>详情</button>"
+                       "</div>"
+                       "<div style='margin-top: 3px; text-align: center;'>"
+                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev'>发送到文生图</button>"
+                       "</div>")
             temp_list.append(buttons)
             template_values.append(temp_list)
         return template_values
