@@ -3,7 +3,7 @@ import base64
 
 import gradio as gr
 
-from modules import scripts, script_callbacks
+from modules import scripts, script_callbacks, ui, generation_parameters_copypaste
 
 base_dir = scripts.basedir()
 template_path = base_dir + r"/template.json"
@@ -19,17 +19,29 @@ def loadjsonfile(template_path):
             temp_list.append(template_dict['prompt'])
             temp_list.append(template_dict['NegativePrompt'])
             raw_encode = base64.b64encode(template_dict['raw'].encode("utf-8"))
-            print(raw_encode.decode('utf-8'))
-            onclick = 'prompt_send_to_txt2img("'+raw_encode.decode('utf-8')+'")'
+            onclick = 'prompt_send_to_txt2img("' + raw_encode.decode('utf-8') + '")'
             buttons = ("<div style='margin-top: 3px; text-align: center;'>"
                        "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev'>详情</button>"
                        "</div>"
                        "<div style='margin-top: 3px; text-align: center;'>"
-                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='"+onclick+"'>发送到文生图</button>"
-                       "</div>")
+                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='" + onclick + "'>to txt2mig</button>"
+                                                                                                                           "</div>")
             temp_list.append(buttons)
             template_values.append(temp_list)
         return template_values
+
+
+def find_prompts(fields):
+    field_prompt = [x for x in fields if x[1] == "Prompt"][0]
+    field_negative_prompt = [x for x in fields if x[1] == "Negative prompt"][0]
+    return [field_prompt[0], field_negative_prompt[0]]
+
+
+def send_prompts(encodeed_prompt_raw):
+    decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
+    params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
+    negative_prompt = params.get("Negative prompt", "")
+    return params.get("Prompt", ""), negative_prompt or gr.update()
 
 
 def refrash_list():
@@ -40,9 +52,12 @@ def add_tab():
     with gr.Blocks(analytics_enabled=False) as tab:
         with gr.Row():
             with gr.Tab('模版列表'):
-                with gr.Row():
-                    with gr.Column():
+                with gr.Row(elem_id="prompt_main"):
+                    with gr.Column(variant="compact"):
                         refrash_list_btn = gr.Button(elem_id='refrash_template_list', value='刷新')
+                        selected_text = gr.TextArea(elem_id='prompt_selected_text', visible=False)
+                        send_to_txt2img = gr.Button(elem_id='prompt_send_to_txt2img', visible=False)
+                        send_to_img2img = gr.Button(elem_id='prompt_send_to_img2img', visible=False)
                 with gr.Row():
                     datatable = gr.DataFrame(headers=headers,
                                              datatype=["str", "str", "html"],
@@ -58,6 +73,18 @@ def add_tab():
             refrash_list_btn.click(
                 fn=refrash_list,
                 outputs=datatable
+            )
+
+            send_to_txt2img.click(
+                fn=send_prompts,
+                inputs=[selected_text],
+                outputs=find_prompts(ui.txt2img_paste_fields)
+            )
+
+            send_to_img2img.click(
+                fn=send_prompts,
+                inputs=[selected_text],
+                outputs=find_prompts(ui.img2img_paste_fields)
             )
 
     return [(tab, "提示词模版", "prompt_template")]
