@@ -8,6 +8,17 @@ from modules import scripts, script_callbacks, ui, generation_parameters_copypas
 base_dir = scripts.basedir()
 template_path = base_dir + r"/template.json"
 headers = ["正向提示词", "负向提示词", "操作"]
+paste_int_field_names = ['Steps', 'Seed', 'Size-1', 'Size-2', 'Denoising strength', 'Hires resize-1', 'Hires resize-2']
+paste_field_name_map = {
+    'img2img': {
+        'names': [],
+        'fields': []
+    },
+    'txt2img': {
+        'names': [],
+        'fields': []
+    }
+}
 
 
 def loadjsonfile(template_path):
@@ -31,17 +42,46 @@ def loadjsonfile(template_path):
         return template_values
 
 
-def find_prompts(fields):
-    field_prompt = [x for x in fields if x[1] == "Prompt"][0]
-    field_negative_prompt = [x for x in fields if x[1] == "Negative prompt"][0]
-    return [field_prompt[0], field_negative_prompt[0]]
+def find_prompts(fields, paste_type):
+    for field, name in fields:
+        if isinstance(name, str):
+            paste_field_name_map.get(paste_type).get('names').append(name)
+            paste_field_name_map.get(paste_type).get('fields').append(field)
+    return paste_field_name_map.get(paste_type).get('fields')
 
 
-def send_prompts(encodeed_prompt_raw):
+def find_txt2img_prompts(fields):
+    return find_prompts(fields, 'txt2img')
+
+
+def find_img2img_prompts(fields):
+    return find_prompts(fields, 'img2img')
+
+
+def send_prompts(encodeed_prompt_raw, paste_type):
     decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
-    negative_prompt = params.get("Negative prompt", "")
-    return params.get("Prompt", ""), negative_prompt or gr.update()
+    values = []
+    for name in paste_field_name_map.get(paste_type).get('names'):
+        val = params.get(name)
+        print('name: ' + name + ', val: ' + str(val))
+        try:
+            values.append(int(val))
+        except:
+            values.append(str(val))
+        # if name in paste_int_field_names:
+        #     values.append(int(val))
+        # else:
+        #     values.append(str(val))
+    return tuple(values) or gr.update()
+
+
+def send_txt2img_prompts(encodeed_prompt_raw):
+    return send_prompts(encodeed_prompt_raw, 'txt2img')
+
+
+def send_img2img_prompts(encodeed_prompt_raw):
+    return send_prompts(encodeed_prompt_raw, 'img2img')
 
 
 def refrash_list():
@@ -76,15 +116,15 @@ def add_tab():
             )
 
             send_to_txt2img.click(
-                fn=send_prompts,
+                fn=send_txt2img_prompts,
                 inputs=[selected_text],
-                outputs=find_prompts(ui.txt2img_paste_fields)
+                outputs=find_txt2img_prompts(ui.txt2img_paste_fields)
             )
 
             send_to_img2img.click(
-                fn=send_prompts,
+                fn=send_img2img_prompts,
                 inputs=[selected_text],
-                outputs=find_prompts(ui.img2img_paste_fields)
+                outputs=find_img2img_prompts(ui.img2img_paste_fields)
             )
 
     return [(tab, "提示词模版", "prompt_template")]
