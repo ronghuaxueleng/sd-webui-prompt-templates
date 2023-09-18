@@ -13,9 +13,11 @@ paste_int_field_default_val_map = {
     'Variation seed': -1,
     'Variation seed strength': 0,
     'Seed resize from-1': 0,
-    'Seed resize from-2': 0
+    'Seed resize from-2': 0,
+    'X Type': 'Nothing',
+    'Y Type': 'Nothing',
+    'Z Type': 'Nothing',
 }
-paste_int_field_names = ['Steps', 'Seed', 'Size-1', 'Size-2', 'Denoising strength', 'Hires resize-1', 'Hires resize-2']
 paste_field_name_map = {
     'img2img': {
         'names': [],
