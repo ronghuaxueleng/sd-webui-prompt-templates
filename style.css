@@ -1,0 +1,8 @@
+#prompt_main #refrash_template_list {
+    width: 100px;
+}
+
+th.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within,
+td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
+    --ring-color: none;
+}
