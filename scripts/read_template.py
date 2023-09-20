@@ -26,14 +26,20 @@ def loadjsonfile(template_path):
             temp_list = list()
             temp_list.append(template_dict['prompt'])
             temp_list.append(template_dict['NegativePrompt'])
-            raw_encode = base64.b64encode(template_dict['raw'].encode("utf-8"))
-            onclick = 'prompt_send_to_txt2img("' + raw_encode.decode('utf-8') + '")'
+            raw_encode = base64.b64encode(template_dict['raw'].encode("utf-8")).decode('utf-8')
+            jump_to_detail_onclick = 'jump_to_detail("' + raw_encode + '")'
+            prompt_send_to_txt2img_onclick = 'prompt_send_to_txt2img("' + raw_encode + '")'
+            prompt_send_to_img2img_onclick = 'prompt_send_to_img2img("' + raw_encode + '")'
             buttons = ("<div style='margin-top: 3px; text-align: center;'>"
-                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev'>详情</button>"
+                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='" + jump_to_detail_onclick + "'>详情</button>"
                        "</div>"
                        "<div style='margin-top: 3px; text-align: center;'>"
-                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='" + onclick + "'>to txt2mig</button>"
-                                                                                                                           "</div>")
+                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='" + prompt_send_to_txt2img_onclick + "'>to txt2mig</button>"
+                       "</div>"
+                       "<div style='margin-top: 3px; text-align: center;'>"
+                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='" + prompt_send_to_img2img_onclick + "'>to img2mig</button>"
+                       "</div>"
+                       )
             temp_list.append(buttons)
             template_values.append(temp_list)
         return template_values
@@ -85,7 +91,7 @@ def refrash_list():
 def add_tab():
     with gr.Blocks(analytics_enabled=False) as tab:
         with gr.Row():
-            with gr.Tab('模版列表'):
+            with gr.Tab(label='模版列表', elem_id="template_list_tab"):
                 with gr.Row(elem_id="prompt_main"):
                     with gr.Column(variant="compact"):
                         refrash_list_btn = gr.Button(elem_id='refrash_template_list', value='刷新')
@@ -103,6 +109,10 @@ def add_tab():
                                              value=loadjsonfile(template_path),
                                              elem_id="prompt_template_list"
                                              )
+
+            with gr.Tab(label='详情', elem_id="template_detail_tab"):
+                with gr.Row():
+                    gr.Label("111")
 
             refrash_list_btn.click(
                 fn=refrash_list,

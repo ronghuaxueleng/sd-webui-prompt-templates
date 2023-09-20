@@ -1,5 +1,12 @@
+function jump_to_detail(encodeed_prompt_raw) {
+    gradioApp().querySelector('#tab_prompt_template').querySelectorAll('button')[1].click();
+}
 function prompt_send_to_txt2img(encodeed_prompt_raw) {
     prompt_send_to('txt2img', encodeed_prompt_raw)
+}
+
+function prompt_send_to_img2img(encodeed_prompt_raw) {
+    prompt_send_to('img2img', encodeed_prompt_raw)
 }
 
 function prompt_send_to(where, text){
