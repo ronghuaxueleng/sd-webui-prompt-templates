@@ -1,0 +1,22 @@
+{
+  "paste_int_field_default_val_map": {
+    "Seed": -1,
+    "Variation seed": -1,
+    "Variation seed strength": 0,
+    "Seed resize from-1": 0,
+    "Seed resize from-2": 0,
+    "X Type": "Nothing",
+    "Y Type": "Nothing",
+    "Z Type": "Nothing"
+  },
+  "paste_field_name_map": {
+    "img2img": {
+      "names": [],
+      "fields": []
+    },
+    "txt2img": {
+      "names": [],
+      "fields": []
+    }
+  }
+}

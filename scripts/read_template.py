@@ -6,28 +6,16 @@ import gradio as gr
 from modules import scripts, script_callbacks, ui, generation_parameters_copypaste
 
 base_dir = scripts.basedir()
+config_path = base_dir + r"/config.json"
 template_path = base_dir + r"/template.json"
 headers = ["正向提示词", "负向提示词", "操作"]
-paste_int_field_default_val_map = {
-    'Seed': -1,
-    'Variation seed': -1,
-    'Variation seed strength': 0,
-    'Seed resize from-1': 0,
-    'Seed resize from-2': 0,
-    'X Type': 'Nothing',
-    'Y Type': 'Nothing',
-    'Z Type': 'Nothing',
-}
-paste_field_name_map = {
-    'img2img': {
-        'names': [],
-        'fields': []
-    },
-    'txt2img': {
-        'names': [],
-        'fields': []
-    }
-}
+paste_int_field_default_val_map = {}
+paste_field_name_map = {}
+
+with open(config_path, "r", encoding="utf-8-sig") as f:
+    configs = json.loads(f.read())
+    paste_field_name_map = configs['paste_field_name_map']
+    paste_int_field_default_val_map = configs['paste_int_field_default_val_map']
 
 
 def loadjsonfile(template_path):
@@ -73,7 +61,6 @@ def send_prompts(encodeed_prompt_raw, paste_type):
     values = []
     for name in paste_field_name_map.get(paste_type).get('names'):
         val = params.get(name)
-        print('name: ' + name + ', val: ' + str(val))
         if val is None and name in paste_int_field_default_val_map.keys():
             val = paste_int_field_default_val_map.get(name)
         try:
