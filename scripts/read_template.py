@@ -7,6 +7,7 @@ from modules import scripts, script_callbacks, ui, generation_parameters_copypas
 
 base_dir = scripts.basedir()
 config_path = base_dir + r"/config.json"
+detail_html_path = base_dir + r"/detail.html"
 template_path = base_dir + r"/template.json"
 headers = ["正向提示词", "负向提示词", "操作"]
 paste_int_field_default_val_map = {}
@@ -112,7 +113,9 @@ def add_tab():
 
             with gr.Tab(label='详情', elem_id="template_detail_tab"):
                 with gr.Row():
-                    gr.Label("111")
+                    with open(detail_html_path, encoding="utf8") as file:
+                        detailHtml = file.read()
+                    gr.HTML(detailHtml)
 
             refrash_list_btn.click(
                 fn=refrash_list,
