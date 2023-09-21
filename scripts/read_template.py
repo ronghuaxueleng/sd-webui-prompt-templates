@@ -1,3 +1,4 @@
+import html
 import json
 import base64
 
@@ -103,7 +104,7 @@ def show_detail(encodeed_prompt_raw):
         html_conent += f"""
                 <label>
                     <span style="color: #888">{key}:</span>
-                    <span style="color: #888">{value}</span>
+                    <span style="color: #888">{html.escape(str(value))}</span>
                 </label>
         """
     html_conent += f"""
