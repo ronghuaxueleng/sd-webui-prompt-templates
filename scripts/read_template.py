@@ -132,11 +132,12 @@ def add_tab():
                             </div>
                         </div>
                         """
-                        gr.HTML(html_content)
+                        detail_info = gr.HTML(html_content)
 
             detail_text_btn.click(
                 fn=show_detail,
-                inputs=[detail_text]
+                inputs=[detail_text],
+                outputs=[detail_info]
             )
 
             refrash_list_btn.click(
