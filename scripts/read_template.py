@@ -2,7 +2,6 @@ import json
 import base64
 
 import gradio as gr
-
 from modules import scripts, script_callbacks, ui, generation_parameters_copypaste
 
 base_dir = scripts.basedir()
@@ -31,16 +30,17 @@ def loadjsonfile(template_path):
             jump_to_detail_onclick = 'jump_to_detail("' + raw_encode + '")'
             prompt_send_to_txt2img_onclick = 'prompt_send_to_txt2img("' + raw_encode + '")'
             prompt_send_to_img2img_onclick = 'prompt_send_to_img2img("' + raw_encode + '")'
-            buttons = ("<div style='margin-top: 3px; text-align: center;'>"
-                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='" + jump_to_detail_onclick + "'>详情</button>"
-                       "</div>"
-                       "<div style='margin-top: 3px; text-align: center;'>"
-                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='" + prompt_send_to_txt2img_onclick + "'>to txt2mig</button>"
-                       "</div>"
-                       "<div style='margin-top: 3px; text-align: center;'>"
-                       "<button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='" + prompt_send_to_img2img_onclick + "'>to img2mig</button>"
-                       "</div>"
-                       )
+            buttons = f"""
+            <div style='margin-top: 3px; text-align: center;'>
+                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{jump_to_detail_onclick}'>详情</button>
+            </div>
+            <div style='margin-top: 3px; text-align: center;'>
+                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_txt2img_onclick}'>to txt2mig</button>
+            </div>
+            <div style='margin-top: 3px; text-align: center;'>
+                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>to img2mig</button>
+            </div>
+            """
             temp_list.append(buttons)
             template_values.append(temp_list)
         return template_values
@@ -89,6 +89,10 @@ def refrash_list():
     return gr.Dataframe.update(value=loadjsonfile(template_path))
 
 
+def show_detail(encodeed_prompt_raw):
+    pass
+
+
 def add_tab():
     with gr.Blocks(analytics_enabled=False) as tab:
         with gr.Row():
@@ -113,9 +117,27 @@ def add_tab():
 
             with gr.Tab(label='详情', elem_id="template_detail_tab"):
                 with gr.Row():
-                    with open(detail_html_path, encoding="utf8") as file:
-                        detailHtml = file.read()
-                    gr.HTML(detailHtml)
+                    with gr.Column(variant="compact"):
+                        detail_text = gr.TextArea(elem_id='prompt_detail_text', visible=False)
+                        detail_text_btn = gr.Button(elem_id='prompt_detail_text_btn', value='刷新', visible=False)
+                        html_content = f"""
+                        <div class="basic-grey">
+                            <div id="content">
+                                <h1>
+                                    提示词详细信息
+                                </h1>
+                                <label>
+                                    <span style="color: #888">没有详情数据</span>
+                                </label>
+                            </div>
+                        </div>
+                        """
+                        gr.HTML(html_content)
+
+            detail_text_btn.click(
+                fn=show_detail,
+                inputs=[detail_text]
+            )
 
             refrash_list_btn.click(
                 fn=refrash_list,

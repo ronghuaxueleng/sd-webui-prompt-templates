@@ -1,5 +1,10 @@
 function jump_to_detail(encodeed_prompt_raw) {
     gradioApp().querySelector('#tab_prompt_template').querySelectorAll('button')[1].click();
+    textarea = gradioApp().querySelector('#prompt_detail_text textarea')
+    textarea.value = encodeed_prompt_raw
+    updateInput(textarea)
+    textarea.click()
+    gradioApp().querySelector('#prompt_detail_text_btn').click()
 }
 function prompt_send_to_txt2img(encodeed_prompt_raw) {
     prompt_send_to('txt2img', encodeed_prompt_raw)
