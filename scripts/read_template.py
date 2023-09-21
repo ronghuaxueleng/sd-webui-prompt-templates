@@ -90,7 +90,27 @@ def refrash_list():
 
 
 def show_detail(encodeed_prompt_raw):
-    pass
+    decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
+    params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
+    html_conent = f"""
+    <div class="basic-grey">
+        <div id="content">
+            <h1>
+                提示词详细信息
+            </h1>
+    """
+    for key, value in params.items():
+        html_conent += f"""
+                <label>
+                    <span style="color: #888">{key}:</span>
+                    <span style="color: #888">{value}</span>
+                </label>
+        """
+    html_conent += f"""
+        </div>
+    </div>
+    """
+    return html_conent
 
 
 def add_tab():
