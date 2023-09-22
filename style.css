@@ -12,7 +12,7 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
 }
 
 .info-content > .row{
-    display: table-row;
+    display: flex;
 }
 
 #prompt-content {
@@ -28,12 +28,6 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
 
 #preview-content {
     display: table-cell;
-}
-
-#preview-content > img {
-    max-width: 435px;
-    height: 100%;
-    object-fit: cover;
 }
 
 #prompt-content h1 {
