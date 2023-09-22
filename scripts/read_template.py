@@ -36,10 +36,10 @@ def loadjsonfile(template_path):
                 <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{jump_to_detail_onclick}'>详情</button>
             </div>
             <div style='margin-top: 3px; text-align: center;'>
-                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_txt2img_onclick}'>to txt2mig</button>
+                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_txt2img_onclick}'>to txt2img</button>
             </div>
             <div style='margin-top: 3px; text-align: center;'>
-                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>to img2mig</button>
+                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>to img2img</button>
             </div>
             """
             temp_list.append(buttons)
@@ -103,8 +103,8 @@ def show_detail(encodeed_prompt_raw):
     for key, value in params.items():
         html_conent += f"""
                 <label>
-                    <span style="color: #888">{key}:</span>
-                    <span style="color: #888">{html.escape(str(value))}</span>
+                    <span>{key}</span>
+                    <span>{html.escape(str(value))}</span>
                 </label>
         """
     html_conent += f"""
