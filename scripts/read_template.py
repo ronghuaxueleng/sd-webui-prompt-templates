@@ -94,9 +94,15 @@ def refrash_list():
 def show_detail(encodeed_prompt_raw):
     decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
+    with open(pics_dir_path + "/静.jpg","rb") as f:
+        imagebytes = base64.b64encode(f.read())
+        imagestr = imagebytes.decode('utf-8')
     html_conent = f"""
     <div class="info-content">
         <div class="row">
+            <div id="preview-content">
+                <img src="data:image/jpg;base64,{imagestr}">
+            </div>
             <div id="prompt-content">
                 <h1>
                     提示词详细信息
@@ -109,20 +115,12 @@ def show_detail(encodeed_prompt_raw):
                     <span>{html.escape(str(value))}</span>
                 </label>
         """
-
-    with open(pics_dir_path + "/静.jpg","rb") as f:
-        imagebytes = base64.b64encode(f.read())
-        imagestr = imagebytes.decode('utf-8')
-
     html_conent += f"""
-            </div>
-            <div id="preview-content">
-                <img src="data:image/jpg;base64,{imagestr}">
             </div>
         </div>
     </div>
     """
-    return html_conent
+    return html_conent, gr.Button.update(visible=True), gr.Button.update(visible=True)
 
 
 def add_tab():
@@ -153,8 +151,8 @@ def add_tab():
                         detail_text = gr.TextArea(elem_id='prompt_detail_text', visible=False)
                         detail_text_btn = gr.Button(elem_id='prompt_detail_text_btn', visible=False)
                         with gr.Row(elem_id="detail_send_to_btns"):
-                            send_detail_to_txt2img = gr.Button(elem_id='detail_send_to_txt2img', value='发送到文生图')
-                            send_detail_to_img2img = gr.Button(elem_id='detail_send_to_img2img', value='发送到图生图')
+                            send_detail_to_txt2img = gr.Button(elem_id='detail_send_to_txt2img', value='发送到文生图', visible=False)
+                            send_detail_to_img2img = gr.Button(elem_id='detail_send_to_img2img', value='发送到图生图', visible=False)
                         html_content = f"""
                         <div class="info-content">
                             <div id="content">
@@ -172,7 +170,7 @@ def add_tab():
             detail_text_btn.click(
                 fn=show_detail,
                 inputs=[detail_text],
-                outputs=[detail_info]
+                outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img]
             )
 
             refrash_list_btn.click(

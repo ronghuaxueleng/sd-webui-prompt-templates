@@ -2,6 +2,10 @@
     width: 100px;
 }
 
+#detail_send_to_btns {
+    display: inline-block;
+}
+
 th.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within,
 td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     --ring-color: none;
@@ -24,10 +28,16 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     color: #888;
     text-shadow: 1px 1px 1px #FFF;
     border: 1px solid #E4E4E4;
+    overflow-y: scroll;
+    max-height: 600px;
 }
 
 #preview-content {
     display: table-cell;
+}
+
+#preview-content > img {
+    max-height: 600px;
 }
 
 #prompt-content h1 {
