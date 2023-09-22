@@ -109,7 +109,9 @@ def show_detail(encodeed_prompt_raw):
         """
     html_conent += f"""
         </div>
-        <div id="preview-content"></div>
+        <div id="preview-content">
+            <img src="../pics/静.jpg" alt="" style="width: 100%;height:100%;object-fit: cover;">
+        </div>
     </div>
     """
     return html_conent
