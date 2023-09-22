@@ -151,7 +151,10 @@ def add_tab():
                 with gr.Row():
                     with gr.Column(variant="compact"):
                         detail_text = gr.TextArea(elem_id='prompt_detail_text', visible=False)
-                        detail_text_btn = gr.Button(elem_id='prompt_detail_text_btn', value='刷新', visible=False)
+                        detail_text_btn = gr.Button(elem_id='prompt_detail_text_btn', visible=False)
+                        with gr.Row(elem_id="detail_send_to_btns"):
+                            send_detail_to_txt2img = gr.Button(elem_id='detail_send_to_txt2img', value='发送到文生图')
+                            send_detail_to_img2img = gr.Button(elem_id='detail_send_to_img2img', value='发送到图生图')
                         html_content = f"""
                         <div class="info-content">
                             <div id="content">
@@ -187,6 +190,20 @@ def add_tab():
                 fn=send_img2img_prompts,
                 inputs=[selected_text],
                 outputs=find_img2img_prompts(ui.img2img_paste_fields)
+            )
+
+            send_detail_to_txt2img.click(
+                fn=send_txt2img_prompts,
+                inputs=[detail_text],
+                outputs=find_txt2img_prompts(ui.txt2img_paste_fields),
+                _js="switch_to_txt2img"
+            )
+
+            send_detail_to_img2img.click(
+                fn=send_img2img_prompts,
+                inputs=[detail_text],
+                outputs=find_img2img_prompts(ui.img2img_paste_fields),
+                _js="switch_to_img2img"
             )
 
     return [(tab, "提示词模版", "prompt_template")]
