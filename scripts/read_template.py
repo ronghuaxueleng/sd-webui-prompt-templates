@@ -167,6 +167,15 @@ def add_tab():
                         """
                         detail_info = gr.HTML(html_content)
 
+            with gr.Tab(label='添加模版', elem_id="add_template_tab"):
+                with gr.TabItem(label="上传添加"):
+                    with gr.Row():
+                        img = gr.Image(shape=(200, 200), label="请上传图片")
+                        img_button = gr.Button("添加")
+                with gr.TabItem(label="手动添加"):
+                    with gr.Row():
+                        gr.HTML()
+
             detail_text_btn.click(
                 fn=show_detail,
                 inputs=[detail_text],
