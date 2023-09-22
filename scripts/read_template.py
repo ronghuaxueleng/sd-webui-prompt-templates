@@ -6,6 +6,7 @@ import gradio as gr
 from modules import scripts, script_callbacks, ui, generation_parameters_copypaste
 
 base_dir = scripts.basedir()
+pics_dir_path = base_dir + r"/pics"
 config_path = base_dir + r"/config.json"
 detail_html_path = base_dir + r"/detail.html"
 template_path = base_dir + r"/template.json"
@@ -107,10 +108,15 @@ def show_detail(encodeed_prompt_raw):
                     <span>{html.escape(str(value))}</span>
                 </label>
         """
+
+    with open(pics_dir_path + "/静.jpg","rb") as f:
+        imagebytes = base64.b64encode(f.read())
+        imagestr = imagebytes.decode('utf-8')
+
     html_conent += f"""
         </div>
         <div id="preview-content">
-            <img src="../pics/静.jpg" alt="" style="width: 100%;height:100%;object-fit: cover;">
+            <img src="data:image/jpg;base64,{imagestr}" style="width: 100%;height:100%;object-fit: cover;">
         </div>
     </div>
     """
