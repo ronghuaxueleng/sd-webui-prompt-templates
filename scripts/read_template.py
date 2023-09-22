@@ -116,7 +116,7 @@ def show_detail(encodeed_prompt_raw):
     html_conent += f"""
         </div>
         <div id="preview-content">
-            <img src="data:image/jpg;base64,{imagestr}" style="width: 100%;height:100%;object-fit: cover;">
+            <img src="data:image/jpg;base64,{imagestr}">
         </div>
     </div>
     """

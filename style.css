@@ -9,6 +9,7 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
 
 
 #prompt-content {
+    float: left;
     display: inline-block;
     max-width: 1000px;
     background: #F7F7F7;
@@ -20,7 +21,14 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
 }
 
 #preview-content {
+    float: left;
     display: inline-block;
+}
+
+#preview-content > img {
+    max-width: 435px;
+    height: 100%;
+    object-fit: cover;
 }
 
 #prompt-content h1 {
