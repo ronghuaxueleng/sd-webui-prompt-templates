@@ -7,10 +7,16 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     --ring-color: none;
 }
 
+.info-content {
+    display: table;
+}
+
+.info-content > .row{
+    display: table-row;
+}
 
 #prompt-content {
-    float: left;
-    display: inline-block;
+    display: table-cell;
     max-width: 1000px;
     background: #F7F7F7;
     padding: 25px 15px 25px 10px;
@@ -21,8 +27,7 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
 }
 
 #preview-content {
-    float: left;
-    display: inline-block;
+    display: table-cell;
 }
 
 #preview-content > img {

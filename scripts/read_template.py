@@ -96,10 +96,11 @@ def show_detail(encodeed_prompt_raw):
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
     html_conent = f"""
     <div class="info-content">
-        <div id="prompt-content">
-            <h1>
-                提示词详细信息
-            </h1>
+        <div class="row">
+            <div id="prompt-content">
+                <h1>
+                    提示词详细信息
+                </h1>
     """
     for key, value in params.items():
         html_conent += f"""
@@ -114,9 +115,10 @@ def show_detail(encodeed_prompt_raw):
         imagestr = imagebytes.decode('utf-8')
 
     html_conent += f"""
-        </div>
-        <div id="preview-content">
-            <img src="data:image/jpg;base64,{imagestr}">
+            </div>
+            <div id="preview-content">
+                <img src="data:image/jpg;base64,{imagestr}">
+            </div>
         </div>
     </div>
     """
