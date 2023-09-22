@@ -94,8 +94,8 @@ def show_detail(encodeed_prompt_raw):
     decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
     html_conent = f"""
-    <div class="basic-grey">
-        <div id="content">
+    <div class="info-content">
+        <div id="prompt-content">
             <h1>
                 提示词详细信息
             </h1>
@@ -109,6 +109,7 @@ def show_detail(encodeed_prompt_raw):
         """
     html_conent += f"""
         </div>
+        <div id="preview-content"></div>
     </div>
     """
     return html_conent
@@ -142,7 +143,7 @@ def add_tab():
                         detail_text = gr.TextArea(elem_id='prompt_detail_text', visible=False)
                         detail_text_btn = gr.Button(elem_id='prompt_detail_text_btn', value='刷新', visible=False)
                         html_content = f"""
-                        <div class="basic-grey">
+                        <div class="info-content">
                             <div id="content">
                                 <h1>
                                     提示词详细信息

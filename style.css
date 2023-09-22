@@ -8,10 +8,8 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
 }
 
 
-/* Basic Grey */
-.basic-grey {
-    margin-left: auto;
-    margin-right: auto;
+#prompt-content {
+    display: inline-block;
     max-width: 1000px;
     background: #F7F7F7;
     padding: 25px 15px 25px 10px;
@@ -21,7 +19,11 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     border: 1px solid #E4E4E4;
 }
 
-.basic-grey h1 {
+#preview-content {
+    display: inline-block;
+}
+
+#prompt-content h1 {
     font-size: 25px;
     padding: 0 0 10px 40px;
     display: block;
@@ -30,12 +32,12 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     color: #888;
 }
 
-.basic-grey h1 > span {
+#prompt-content h1 > span {
     display: block;
     font-size: 11px;
 }
 
-.basic-grey label {
+#prompt-content label {
     display: block;
     margin: 0;
     min-height: 25px;
@@ -44,16 +46,15 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     border-bottom: 1px solid #ccc;
 }
 
-.basic-grey label > span {
+#prompt-content label > span {
     text-align: left;
     padding-right: 10px;
     margin-top: 10px;
-    color: #888;
     min-width: 200px;
     display: table-cell;
 }
 
-.basic-grey .button {
+#prompt-content .button {
     background: #E27575;
     border: none;
     padding: 10px 25px 10px 25px;
@@ -64,6 +65,6 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     cursor: pointer;
 }
 
-.basic-grey .button:hover {
+#prompt-content .button:hover {
     background: #CF7A7A
 }
