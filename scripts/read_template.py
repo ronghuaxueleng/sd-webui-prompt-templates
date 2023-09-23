@@ -85,7 +85,8 @@ def loadjsonfile(template_path):
                     template_values.append(temp_list)
                 except Exception as e:
                     print(e)
-            return template_values.reverse()
+            template_values.reverse()
+            return template_values
     except FileNotFoundError as e:
         pathlib.Path(template_path).touch()
     except Exception as e:
