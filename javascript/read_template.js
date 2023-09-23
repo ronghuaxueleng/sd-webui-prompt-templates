@@ -1,9 +1,11 @@
-function delete_template_onclick(id) {
-    textarea = gradioApp().querySelector('#delete_template_id textarea')
-    textarea.value = id
-    updateInput(textarea)
-    textarea.click()
-    gradioApp().querySelector('#delete_template_id_btn').click()
+function delete_template(id) {
+    if (confirm('确定要删除这个模版吗？')) {
+        textarea = gradioApp().querySelector('#template_id textarea')
+        textarea.value = id
+        updateInput(textarea)
+        textarea.click()
+        gradioApp().querySelector('#delete_template_by_id_btn').click()
+    }
 }
 function jump_to_detail(encodeed_prompt_raw, filename) {
     gradioApp().querySelector('#tab_prompt_template').querySelectorAll('button')[1].click();
