@@ -1,14 +1,14 @@
+import base64
 import hashlib
 import html
 import json
-import base64
 import os
 import pathlib
-import time
 
 import gradio as gr
 from PIL import UnidentifiedImageError, Image
 
+from db import Template
 from modules import scripts, script_callbacks, ui, generation_parameters_copypaste, images
 
 base_dir = scripts.basedir()
@@ -49,28 +49,27 @@ def make_thumb(image, filename):
 
 def loadjsonfile(template_path):
     try:
-        with open(template_path, "r", encoding="utf-8-sig") as jsonFile:
-            template_values = []
-            templates = json.loads(jsonFile.read())
-            for template_dict in templates:
-                try:
-                    temp_list = list()
-                    with open(pics_dir_path + "/" + template_dict['filename'], "rb") as imgFile:
-                        imagebytes = base64.b64encode(imgFile.read())
-                    imagestr = imagebytes.decode('utf-8')
-                    preview_img = f"""
+        template_values = []
+        for templateObj in Template.select():
+            try:
+                temp_list = list()
+                with open(pics_dir_path + "/" + templateObj.filename, "rb") as imgFile:
+                    imagebytes = base64.b64encode(imgFile.read())
+                imagestr = imagebytes.decode('utf-8')
+                preview_img = f"""
                     <div class='preview-img'>
                         <img src='data:image/jpg;base64,{imagestr}'>
                     </div>
                     """
-                    temp_list.append(preview_img)
-                    temp_list.append(template_dict['prompt'])
-                    temp_list.append(template_dict['NegativePrompt'])
-                    raw_encode = base64.b64encode(template_dict['raw'].encode("utf-8")).decode('utf-8')
-                    jump_to_detail_onclick = f"""jump_to_detail(\"{raw_encode}\", \"{template_dict['filename']}\")"""
-                    prompt_send_to_txt2img_onclick = 'prompt_send_to_txt2img("' + raw_encode + '")'
-                    prompt_send_to_img2img_onclick = 'prompt_send_to_img2img("' + raw_encode + '")'
-                    buttons = f"""
+                temp_list.append(preview_img)
+                temp_list.append(templateObj.prompt)
+                temp_list.append(templateObj.negativePrompt)
+                raw_encode = base64.b64encode(templateObj.raw.encode("utf-8")).decode('utf-8')
+                jump_to_detail_onclick = f'''jump_to_detail("{raw_encode}", "{templateObj.filename}")'''
+                prompt_send_to_txt2img_onclick = f'''prompt_send_to_txt2img("{raw_encode}")'''
+                prompt_send_to_img2img_onclick = f'''prompt_send_to_img2img("{raw_encode}")'''
+                delete_template_onclick = f'''delete_template({templateObj.id})'''
+                buttons = f"""
                     <div style='margin-top: 3px; text-align: center;'>
                         <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{jump_to_detail_onclick}'>详情</button>
                     </div>
@@ -80,15 +79,16 @@ def loadjsonfile(template_path):
                     <div style='margin-top: 3px; text-align: center;'>
                         <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>发送到图生图</button>
                     </div>
+                    <div style='margin-top: 3px; text-align: center;'>
+                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{delete_template_onclick}'>删除</button>
+                    </div>
                     """
-                    temp_list.append(buttons)
-                    template_values.append(temp_list)
-                except Exception as e:
-                    print(e)
-            template_values.reverse()
-            return template_values
-    except FileNotFoundError as e:
-        pathlib.Path(template_path).touch()
+                temp_list.append(buttons)
+                template_values.append(temp_list)
+            except Exception as e:
+                print(e)
+        template_values.reverse()
+        return template_values
     except Exception as e:
         print(e)
 
