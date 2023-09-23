@@ -212,6 +212,9 @@ def saveto_template(encodeed_prompt_raw, image):
         state=0,
         timestamp=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
     ).execute()
+
+
+def saveto_template_success():
     return refrash_list()
 
 
@@ -308,13 +311,13 @@ def add_tab():
                         img_info = gr.HTML()
 
             delete_template_by_id_btn.click(fn=delete_template_by_id, inputs=template_id, outputs=datatable)
-            save_to_template.click(fn=saveto_template, inputs=[png_info_text, img], _js="function(){alert('保存成功，请到模版列表查看');}",
-                                   outputs=datatable)
+            save_to_template.click(fn=saveto_template, inputs=[png_info_text, img]).success(
+                fn=saveto_template_success, outputs=datatable, _js="function(){alert('保存成功，请到模版列表查看');}")
             img.upload(fn=get_png_info, inputs=img, outputs=[img_info, png_info_text])
             detail_text_btn.click(fn=show_detail, inputs=[detail_text, prompt_detail_filename_text],
                                   outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img])
             refrash_list_btn.click(fn=refrash_list, outputs=datatable)
-            delete_invalid_pre_image_btn.click(fn=delete_invalid_pre_image, _js="function(){alert('清理完毕');}",)
+            delete_invalid_pre_image_btn.click(fn=delete_invalid_pre_image, _js="function(){alert('清理完毕');}")
             send_to_txt2img.click(fn=send_txt2img_prompts, inputs=[selected_text],
                                   outputs=find_txt2img_prompts(ui.txt2img_paste_fields))
             send_to_img2img.click(fn=send_img2img_prompts, inputs=[selected_text],
