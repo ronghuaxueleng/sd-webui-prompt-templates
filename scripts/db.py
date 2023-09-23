@@ -10,7 +10,7 @@ db = SqliteDatabase(base_dir + '/template.db')
 
 
 class Template(Model):
-    id = IntegerField(primary_key=True)
+    id = PrimaryKeyField()
     prompt = TextField(null=True)
     negativePrompt = TextField(null=True)
     raw = TextField(unique=True)

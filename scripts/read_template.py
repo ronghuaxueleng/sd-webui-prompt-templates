@@ -4,18 +4,18 @@ import html
 import json
 import os
 import pathlib
+import time
 
 import gradio as gr
 from PIL import UnidentifiedImageError, Image
 
-from db import Template
+from scripts.db import Template
 from modules import scripts, script_callbacks, ui, generation_parameters_copypaste, images
 
 base_dir = scripts.basedir()
 pics_dir_path = base_dir + r"/pics"
 config_path = base_dir + r"/config.json"
 detail_html_path = base_dir + r"/detail.html"
-template_path = base_dir + r"/template.json"
 headers = ["预览", "正向提示词", "负向提示词", "操作"]
 paste_int_field_default_val_map = {}
 paste_field_name_map = {}
@@ -47,48 +47,50 @@ def make_thumb(image, filename):
     thumb.save(filename, quality=100)  # 默认 JPEG 保存质量是 75, 不太清楚。可选值(0~100)
 
 
-def loadjsonfile(template_path):
+def loadjsonfile():
     try:
-        template_values = []
-        for templateObj in Template.select():
-            try:
-                temp_list = list()
-                with open(pics_dir_path + "/" + templateObj.filename, "rb") as imgFile:
-                    imagebytes = base64.b64encode(imgFile.read())
-                imagestr = imagebytes.decode('utf-8')
-                preview_img = f"""
-                    <div class='preview-img'>
-                        <img src='data:image/jpg;base64,{imagestr}'>
-                    </div>
-                    """
-                temp_list.append(preview_img)
-                temp_list.append(templateObj.prompt)
-                temp_list.append(templateObj.negativePrompt)
-                raw_encode = base64.b64encode(templateObj.raw.encode("utf-8")).decode('utf-8')
-                jump_to_detail_onclick = f'''jump_to_detail("{raw_encode}", "{templateObj.filename}")'''
-                prompt_send_to_txt2img_onclick = f'''prompt_send_to_txt2img("{raw_encode}")'''
-                prompt_send_to_img2img_onclick = f'''prompt_send_to_img2img("{raw_encode}")'''
-                delete_template_onclick = f'''delete_template({templateObj.id})'''
-                buttons = f"""
-                    <div style='margin-top: 3px; text-align: center;'>
-                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{jump_to_detail_onclick}'>详情</button>
-                    </div>
-                    <div style='margin-top: 3px; text-align: center;'>
-                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_txt2img_onclick}'>发送到文生图</button>
-                    </div>
-                    <div style='margin-top: 3px; text-align: center;'>
-                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>发送到图生图</button>
-                    </div>
-                    <div style='margin-top: 3px; text-align: center;'>
-                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{delete_template_onclick}'>删除</button>
-                    </div>
-                    """
-                temp_list.append(buttons)
-                template_values.append(temp_list)
-            except Exception as e:
-                print(e)
-        template_values.reverse()
-        return template_values
+        templates = Template.select()
+        if len(templates) > 0:
+            template_values = []
+            for templateObj in templates:
+                try:
+                    temp_list = list()
+                    with open(pics_dir_path + "/" + templateObj.filename, "rb") as imgFile:
+                        imagebytes = base64.b64encode(imgFile.read())
+                    imagestr = imagebytes.decode('utf-8')
+                    preview_img = f"""
+                        <div class='preview-img'>
+                            <img src='data:image/jpg;base64,{imagestr}'>
+                        </div>
+                        """
+                    temp_list.append(preview_img)
+                    temp_list.append(templateObj.prompt)
+                    temp_list.append(templateObj.negativePrompt)
+                    raw_encode = base64.b64encode(templateObj.raw.encode("utf-8")).decode('utf-8')
+                    jump_to_detail_onclick = f'''jump_to_detail("{raw_encode}", "{templateObj.filename}")'''
+                    prompt_send_to_txt2img_onclick = f'''prompt_send_to_txt2img("{raw_encode}")'''
+                    prompt_send_to_img2img_onclick = f'''prompt_send_to_img2img("{raw_encode}")'''
+                    delete_template_onclick = f'''delete_template({templateObj.id})'''
+                    buttons = f"""
+                        <div style='margin-top: 3px; text-align: center;'>
+                            <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{jump_to_detail_onclick}'>详情</button>
+                        </div>
+                        <div style='margin-top: 3px; text-align: center;'>
+                            <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_txt2img_onclick}'>发送到文生图</button>
+                        </div>
+                        <div style='margin-top: 3px; text-align: center;'>
+                            <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>发送到图生图</button>
+                        </div>
+                        <div style='margin-top: 3px; text-align: center;'>
+                            <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{delete_template_onclick}'>删除</button>
+                        </div>
+                        """
+                    temp_list.append(buttons)
+                    template_values.append(temp_list)
+                except Exception as e:
+                    print(e)
+            template_values.reverse()
+            return template_values
     except Exception as e:
         print(e)
 
@@ -133,7 +135,7 @@ def send_img2img_prompts(encodeed_prompt_raw):
 
 
 def refrash_list():
-    return gr.Dataframe.update(value=loadjsonfile(template_path))
+    return gr.Dataframe.update(value=loadjsonfile())
 
 
 def show_detail(encodeed_prompt_raw, filename):
@@ -201,38 +203,29 @@ def get_png_info(image):
 def saveto_template(encodeed_prompt_raw, image):
     filename = hashlib.md5(encodeed_prompt_raw.encode()).hexdigest() + ".jpg"
     make_thumb(image, filename)
-    with open(template_path, "r", encoding="utf-8-sig") as f:
-        try:
-            templates = json.loads(f.read())
-        except:
-            templates = []
-        decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
-        params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
-        temp = dict()
-        temp['raw'] = decodeed_prompt_raw
-        temp['filename'] = filename
-        temp['prompt'] = params['Prompt']
-        temp['NegativePrompt'] = params['Negative prompt']
-        templates.append(temp)
-    with open(template_path, "w", encoding="utf-8-sig") as f:
-        json.dump(templates, f, indent=4, ensure_ascii=False)
+    decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
+    params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
+    Template.insert(
+        prompt=params['Prompt'],
+        negativePrompt=params['Negative prompt'],
+        raw=decodeed_prompt_raw,
+        filename=filename,
+        state=0,
+        timestamp=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+    ).execute()
 
 
 def delete_invalid_pre_image():
     try:
-        with open(template_path, "r", encoding="utf-8-sig") as f:
-            try:
-                templates = json.loads(f.read())
-            except:
-                templates = []
-            filenames = set([template['filename'] for template in templates])
-            for _filename in (set(os.listdir(pics_dir_path)).difference(filenames)):
-                imgFile = pathlib.Path(pics_dir_path + '/' + _filename)
-                if imgFile.is_file():
-                    try:
-                        imgFile.unlink()
-                    except Exception as e:
-                        print(e)
+        templates = Template.select()
+        filenames = set([template.filename for template in templates])
+        for _filename in (set(os.listdir(pics_dir_path)).difference(filenames)):
+            imgFile = pathlib.Path(pics_dir_path + '/' + _filename)
+            if imgFile.is_file():
+                try:
+                    imgFile.unlink()
+                except Exception as e:
+                    print(e)
     except:
         pass
 
@@ -256,7 +249,7 @@ def add_tab():
                                              max_rows=10,
                                              show_label=True,
                                              overflow_row_behaviour="show_ends",
-                                             value=loadjsonfile(template_path),
+                                             value=loadjsonfile(),
                                              elem_id="prompt_template_list"
                                              )
 
