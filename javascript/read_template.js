@@ -1,8 +1,11 @@
-function jump_to_detail(encodeed_prompt_raw) {
+function jump_to_detail(encodeed_prompt_raw, filename) {
     gradioApp().querySelector('#tab_prompt_template').querySelectorAll('button')[1].click();
     textarea = gradioApp().querySelector('#prompt_detail_text textarea')
     textarea.value = encodeed_prompt_raw
     updateInput(textarea)
+    filename_textarea = gradioApp().querySelector('#prompt_detail_filename_text textarea')
+    filename_textarea.value = filename
+    updateInput(filename_textarea)
     textarea.click()
     gradioApp().querySelector('#prompt_detail_text_btn').click()
 }

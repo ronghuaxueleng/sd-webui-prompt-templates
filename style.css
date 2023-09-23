@@ -1,9 +1,22 @@
-#prompt_main #refrash_template_list {
+#prompt_main {
+    display: inline-block;
+}
+
+#prompt_main #refrash_template_list, #delete_invalid_pre_image {
     width: 100px;
+    margin-right: 5px
+}
+
+.preview-img {
+    width: 200px;
 }
 
 #detail_send_to_btns {
     display: inline-block;
+}
+
+#detail_send_to_btns > button {
+    margin-right: 5px;
 }
 
 th.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within,
@@ -15,13 +28,12 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     display: table;
 }
 
-.info-content > .row{
+.info-content > .row {
     display: flex;
 }
 
 #prompt-content {
     display: table-cell;
-    max-width: 1000px;
     background: #F7F7F7;
     padding: 25px 15px 25px 10px;
     font: 12px Georgia, "Times New Roman", Times, serif;
@@ -34,6 +46,7 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
 
 #preview-content {
     display: table-cell;
+    min-width: 400px;
 }
 
 #preview-content > img {

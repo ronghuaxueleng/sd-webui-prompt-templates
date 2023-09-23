@@ -1,9 +1,13 @@
+import hashlib
 import html
 import json
 import base64
+import os
+import pathlib
+import time
 
 import gradio as gr
-from PIL import UnidentifiedImageError
+from PIL import UnidentifiedImageError, Image
 
 from modules import scripts, script_callbacks, ui, generation_parameters_copypaste, images
 
@@ -12,7 +16,7 @@ pics_dir_path = base_dir + r"/pics"
 config_path = base_dir + r"/config.json"
 detail_html_path = base_dir + r"/detail.html"
 template_path = base_dir + r"/template.json"
-headers = ["正向提示词", "负向提示词", "操作"]
+headers = ["预览", "正向提示词", "负向提示词", "操作"]
 paste_int_field_default_val_map = {}
 paste_field_name_map = {}
 
@@ -22,19 +26,48 @@ with open(config_path, "r", encoding="utf-8-sig") as f:
     paste_int_field_default_val_map = configs['paste_int_field_default_val_map']
 
 
+def make_thumb(image, filename):
+    mode = image.mode
+    if mode not in ('L', 'RGB'):
+        if mode == 'RGBA':
+            # 透明图片需要加白色底
+            alpha = image.split()[3]
+            bgmask = alpha.point(lambda x: 255 - x)
+            image = image.convert('RGB')
+            # paste(color, box, mask)
+            image.paste((255, 255, 255), None, bgmask)
+        else:
+            image = image.convert('RGB')
+    _height = 600
+    width, height = image.size
+    _width = int(width * _height / height)
+    filename = pics_dir_path + "/" + filename
+    thumb = image.resize((_width, _height), Image.BILINEAR)
+    print(filename)
+    thumb.save(filename, quality=100)  # 默认 JPEG 保存质量是 75, 不太清楚。可选值(0~100)
+
+
 def loadjsonfile(template_path):
-    with open(template_path, "r", encoding="utf-8-sig") as f:
-        template_values = None
-        try:
+    try:
+        with open(template_path, "r", encoding="utf-8-sig") as jsonFile:
             template_values = []
-            templates = json.loads(f.read())
+            templates = json.loads(jsonFile.read())
             for template_dict in templates:
                 try:
                     temp_list = list()
+                    with open(pics_dir_path + "/" + template_dict['filename'], "rb") as imgFile:
+                        imagebytes = base64.b64encode(imgFile.read())
+                    imagestr = imagebytes.decode('utf-8')
+                    preview_img = f"""
+                    <div class='preview-img'>
+                        <img src='data:image/jpg;base64,{imagestr}'>
+                    </div>
+                    """
+                    temp_list.append(preview_img)
                     temp_list.append(template_dict['prompt'])
                     temp_list.append(template_dict['NegativePrompt'])
                     raw_encode = base64.b64encode(template_dict['raw'].encode("utf-8")).decode('utf-8')
-                    jump_to_detail_onclick = 'jump_to_detail("' + raw_encode + '")'
+                    jump_to_detail_onclick = f"""jump_to_detail(\"{raw_encode}\", \"{template_dict['filename']}\")"""
                     prompt_send_to_txt2img_onclick = 'prompt_send_to_txt2img("' + raw_encode + '")'
                     prompt_send_to_img2img_onclick = 'prompt_send_to_img2img("' + raw_encode + '")'
                     buttons = f"""
@@ -42,19 +75,21 @@ def loadjsonfile(template_path):
                         <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{jump_to_detail_onclick}'>详情</button>
                     </div>
                     <div style='margin-top: 3px; text-align: center;'>
-                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_txt2img_onclick}'>to txt2img</button>
+                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_txt2img_onclick}'>发送到文生图</button>
                     </div>
                     <div style='margin-top: 3px; text-align: center;'>
-                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>to img2img</button>
+                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>发送到图生图</button>
                     </div>
                     """
                     temp_list.append(buttons)
                     template_values.append(temp_list)
                 except Exception as e:
                     print(e)
-        except Exception as e:
-            print(e)
-        return template_values
+                return template_values
+    except FileNotFoundError as e:
+        pathlib.Path(template_path).touch()
+    except Exception as e:
+        print(e)
 
 
 def find_prompts(fields, paste_type):
@@ -100,10 +135,10 @@ def refrash_list():
     return gr.Dataframe.update(value=loadjsonfile(template_path))
 
 
-def show_detail(encodeed_prompt_raw):
+def show_detail(encodeed_prompt_raw, filename):
     decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
-    with open(pics_dir_path + "/静.jpg", "rb") as f:
+    with open(pics_dir_path + "/" + filename, "rb") as f:
         imagebytes = base64.b64encode(f.read())
         imagestr = imagebytes.decode('utf-8')
     html_conent = f"""
@@ -162,7 +197,9 @@ def get_png_info(image):
     return html_conent, gr.TextArea.update(value=pnginfo_encode)
 
 
-def saveto_template(encodeed_prompt_raw):
+def saveto_template(encodeed_prompt_raw, image):
+    filename = hashlib.md5(encodeed_prompt_raw.encode()).hexdigest() + ".jpg"
+    make_thumb(image, filename)
     with open(template_path, "r", encoding="utf-8-sig") as f:
         try:
             templates = json.loads(f.read())
@@ -172,6 +209,7 @@ def saveto_template(encodeed_prompt_raw):
         params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
         temp = dict()
         temp['raw'] = decodeed_prompt_raw
+        temp['filename'] = filename
         temp['prompt'] = params['Prompt']
         temp['NegativePrompt'] = params['Negative prompt']
         templates.append(temp)
@@ -179,19 +217,39 @@ def saveto_template(encodeed_prompt_raw):
         json.dump(templates, f, indent=4, ensure_ascii=False)
 
 
+def delete_invalid_pre_image():
+    try:
+        with open(template_path, "r", encoding="utf-8-sig") as f:
+            try:
+                templates = json.loads(f.read())
+            except:
+                templates = []
+            filenames = set([template['filename'] for template in templates])
+            for _filename in (set(os.listdir(pics_dir_path)).difference(filenames)):
+                imgFile = pathlib.Path(pics_dir_path + '/' + _filename)
+                if imgFile.is_file():
+                    try:
+                        imgFile.unlink()
+                    except Exception as e:
+                        print(e)
+    except:
+        pass
+
+
 def add_tab():
     with gr.Blocks(analytics_enabled=False) as tab:
         with gr.Row():
             with gr.Tab(label='模版列表', elem_id="template_list_tab"):
                 with gr.Row(elem_id="prompt_main"):
-                    with gr.Column(variant="compact"):
-                        refrash_list_btn = gr.Button(elem_id='refrash_template_list', value='刷新')
-                        selected_text = gr.TextArea(elem_id='prompt_selected_text', visible=False)
-                        send_to_txt2img = gr.Button(elem_id='prompt_send_to_txt2img', visible=False)
-                        send_to_img2img = gr.Button(elem_id='prompt_send_to_img2img', visible=False)
+                    refrash_list_btn = gr.Button(elem_id='refrash_template_list', value='刷新')
+                    delete_invalid_pre_image_btn = gr.Button(elem_id='delete_invalid_pre_image',
+                                                             value='清除无效预览图')
+                    selected_text = gr.TextArea(elem_id='prompt_selected_text', visible=False)
+                    send_to_txt2img = gr.Button(elem_id='prompt_send_to_txt2img', visible=False)
+                    send_to_img2img = gr.Button(elem_id='prompt_send_to_img2img', visible=False)
                 with gr.Row():
                     datatable = gr.DataFrame(headers=headers,
-                                             datatype=["str", "str", "html"],
+                                             datatype=["html", "str", "str", "html"],
                                              interactive=False,
                                              wrap=True,
                                              max_rows=10,
@@ -205,6 +263,7 @@ def add_tab():
                 with gr.Row():
                     with gr.Column(variant="compact"):
                         detail_text = gr.TextArea(elem_id='prompt_detail_text', visible=False)
+                        prompt_detail_filename_text = gr.TextArea(elem_id='prompt_detail_filename_text', visible=False)
                         detail_text_btn = gr.Button(elem_id='prompt_detail_text_btn', visible=False)
                         with gr.Row(elem_id="detail_send_to_btns"):
                             send_detail_to_txt2img = gr.Button(elem_id='detail_send_to_txt2img', value='发送到文生图',
@@ -240,11 +299,12 @@ def add_tab():
                     with gr.Column(scale=4):
                         img_info = gr.HTML()
 
-            save_to_template.click(fn=saveto_template, inputs=png_info_text)
+            save_to_template.click(fn=saveto_template, inputs=[png_info_text, img])
             img.upload(fn=get_png_info, inputs=img, outputs=[img_info, png_info_text])
-            detail_text_btn.click(fn=show_detail, inputs=[detail_text],
+            detail_text_btn.click(fn=show_detail, inputs=[detail_text, prompt_detail_filename_text],
                                   outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img])
             refrash_list_btn.click(fn=refrash_list, outputs=datatable)
+            delete_invalid_pre_image_btn.click(fn=delete_invalid_pre_image)
             send_to_txt2img.click(fn=send_txt2img_prompts, inputs=[selected_text],
                                   outputs=find_txt2img_prompts(ui.txt2img_paste_fields))
             send_to_img2img.click(fn=send_img2img_prompts, inputs=[selected_text],
