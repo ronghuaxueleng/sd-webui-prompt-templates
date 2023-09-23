@@ -3,7 +3,9 @@ import json
 import base64
 
 import gradio as gr
-from modules import scripts, script_callbacks, ui, generation_parameters_copypaste
+from PIL import UnidentifiedImageError
+
+from modules import scripts, script_callbacks, ui, generation_parameters_copypaste, images
 
 base_dir = scripts.basedir()
 pics_dir_path = base_dir + r"/pics"
@@ -94,7 +96,7 @@ def refrash_list():
 def show_detail(encodeed_prompt_raw):
     decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
-    with open(pics_dir_path + "/静.jpg","rb") as f:
+    with open(pics_dir_path + "/静.jpg", "rb") as f:
         imagebytes = base64.b64encode(f.read())
         imagestr = imagebytes.decode('utf-8')
     html_conent = f"""
@@ -121,6 +123,35 @@ def show_detail(encodeed_prompt_raw):
     </div>
     """
     return html_conent, gr.Button.update(visible=True), gr.Button.update(visible=True)
+
+
+def get_png_info(image):
+    try:
+        pnginfo, items = images.read_info_from_image(image)
+    except UnidentifiedImageError as e:
+        pnginfo = None
+    params = generation_parameters_copypaste.parse_generation_parameters(str(pnginfo))
+    html_conent = f"""
+    <div class="info-content">
+        <div class="row">
+            <div id="prompt-content">
+                <h1>
+                    提示词详细信息
+                </h1>
+    """
+    for key, value in params.items():
+        html_conent += f"""
+                <label>
+                    <span>{key}</span>
+                    <span>{html.escape(str(value))}</span>
+                </label>
+        """
+    html_conent += f"""
+            </div>
+        </div>
+    </div>
+    """
+    return html_conent
 
 
 def add_tab():
@@ -151,8 +182,10 @@ def add_tab():
                         detail_text = gr.TextArea(elem_id='prompt_detail_text', visible=False)
                         detail_text_btn = gr.Button(elem_id='prompt_detail_text_btn', visible=False)
                         with gr.Row(elem_id="detail_send_to_btns"):
-                            send_detail_to_txt2img = gr.Button(elem_id='detail_send_to_txt2img', value='发送到文生图', visible=False)
-                            send_detail_to_img2img = gr.Button(elem_id='detail_send_to_img2img', value='发送到图生图', visible=False)
+                            send_detail_to_txt2img = gr.Button(elem_id='detail_send_to_txt2img', value='发送到文生图',
+                                                               visible=False)
+                            send_detail_to_img2img = gr.Button(elem_id='detail_send_to_img2img', value='发送到图生图',
+                                                               visible=False)
                         html_content = f"""
                         <div class="info-content">
                             <div id="content">
@@ -170,11 +203,19 @@ def add_tab():
             with gr.Tab(label='添加模版', elem_id="add_template_tab"):
                 with gr.TabItem(label="上传添加"):
                     with gr.Row():
-                        img = gr.Image(shape=(200, 200), label="请上传图片")
-                        img_button = gr.Button("添加")
+                        with gr.Column(scale=4):
+                            img = gr.Image(type="pil", label="请上传图片", height=512)
+                        with gr.Column(scale=4):
+                            img_info = gr.HTML()
                 with gr.TabItem(label="手动添加"):
                     with gr.Row():
                         gr.HTML()
+
+            img.upload(
+                fn=get_png_info,
+                inputs=img,
+                outputs=img_info
+            )
 
             detail_text_btn.click(
                 fn=show_detail,
