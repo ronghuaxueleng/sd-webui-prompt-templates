@@ -24,29 +24,36 @@ with open(config_path, "r", encoding="utf-8-sig") as f:
 
 def loadjsonfile(template_path):
     with open(template_path, "r", encoding="utf-8-sig") as f:
-        templates = json.loads(f.read())
-        template_values = []
-        for template_dict in templates:
-            temp_list = list()
-            temp_list.append(template_dict['prompt'])
-            temp_list.append(template_dict['NegativePrompt'])
-            raw_encode = base64.b64encode(template_dict['raw'].encode("utf-8")).decode('utf-8')
-            jump_to_detail_onclick = 'jump_to_detail("' + raw_encode + '")'
-            prompt_send_to_txt2img_onclick = 'prompt_send_to_txt2img("' + raw_encode + '")'
-            prompt_send_to_img2img_onclick = 'prompt_send_to_img2img("' + raw_encode + '")'
-            buttons = f"""
-            <div style='margin-top: 3px; text-align: center;'>
-                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{jump_to_detail_onclick}'>详情</button>
-            </div>
-            <div style='margin-top: 3px; text-align: center;'>
-                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_txt2img_onclick}'>to txt2img</button>
-            </div>
-            <div style='margin-top: 3px; text-align: center;'>
-                <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>to img2img</button>
-            </div>
-            """
-            temp_list.append(buttons)
-            template_values.append(temp_list)
+        template_values = None
+        try:
+            template_values = []
+            templates = json.loads(f.read())
+            for template_dict in templates:
+                try:
+                    temp_list = list()
+                    temp_list.append(template_dict['prompt'])
+                    temp_list.append(template_dict['NegativePrompt'])
+                    raw_encode = base64.b64encode(template_dict['raw'].encode("utf-8")).decode('utf-8')
+                    jump_to_detail_onclick = 'jump_to_detail("' + raw_encode + '")'
+                    prompt_send_to_txt2img_onclick = 'prompt_send_to_txt2img("' + raw_encode + '")'
+                    prompt_send_to_img2img_onclick = 'prompt_send_to_img2img("' + raw_encode + '")'
+                    buttons = f"""
+                    <div style='margin-top: 3px; text-align: center;'>
+                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{jump_to_detail_onclick}'>详情</button>
+                    </div>
+                    <div style='margin-top: 3px; text-align: center;'>
+                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_txt2img_onclick}'>to txt2img</button>
+                    </div>
+                    <div style='margin-top: 3px; text-align: center;'>
+                        <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{prompt_send_to_img2img_onclick}'>to img2img</button>
+                    </div>
+                    """
+                    temp_list.append(buttons)
+                    template_values.append(temp_list)
+                except Exception as e:
+                    print(e)
+        except Exception as e:
+            print(e)
         return template_values
 
 
@@ -130,6 +137,7 @@ def get_png_info(image):
         pnginfo, items = images.read_info_from_image(image)
     except UnidentifiedImageError as e:
         pnginfo = None
+    pnginfo_encode = base64.b64encode(str(pnginfo).encode("utf-8")).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(str(pnginfo))
     html_conent = f"""
     <div class="info-content">
@@ -151,7 +159,24 @@ def get_png_info(image):
         </div>
     </div>
     """
-    return html_conent
+    return html_conent, gr.TextArea.update(value=pnginfo_encode)
+
+
+def saveto_template(encodeed_prompt_raw):
+    with open(template_path, "r", encoding="utf-8-sig") as f:
+        try:
+            templates = json.loads(f.read())
+        except:
+            templates = []
+        decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
+        params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
+        temp = dict()
+        temp['raw'] = decodeed_prompt_raw
+        temp['prompt'] = params['Prompt']
+        temp['NegativePrompt'] = params['Negative prompt']
+        templates.append(temp)
+    with open(template_path, "w", encoding="utf-8-sig") as f:
+        json.dump(templates, f, indent=4, ensure_ascii=False)
 
 
 def add_tab():
@@ -201,58 +226,39 @@ def add_tab():
                         detail_info = gr.HTML(html_content)
 
             with gr.Tab(label='添加模版', elem_id="add_template_tab"):
-                with gr.TabItem(label="上传添加"):
-                    with gr.Row():
-                        with gr.Column(scale=4):
+                with gr.Row():
+                    with gr.Column(scale=4):
+                        with gr.Row():
+                            png_info_text = gr.TextArea(elem_id='png_info_text', visible=False)
                             img = gr.Image(type="pil", label="请上传图片", height=512)
-                        with gr.Column(scale=4):
-                            img_info = gr.HTML()
-                with gr.TabItem(label="手动添加"):
-                    with gr.Row():
-                        gr.HTML()
+                        with gr.Row():
+                            add_template_send_to_txt2img = gr.Button(elem_id='add_template_send_to_txt2img',
+                                                                     value='发送到文生图')
+                            add_template_send_to_img2img = gr.Button(elem_id='add_template_send_to_img2img',
+                                                                     value='发送到图生图')
+                            save_to_template = gr.Button(elem_id='save_to_template', value='保存模版')
+                    with gr.Column(scale=4):
+                        img_info = gr.HTML()
 
-            img.upload(
-                fn=get_png_info,
-                inputs=img,
-                outputs=img_info
-            )
-
-            detail_text_btn.click(
-                fn=show_detail,
-                inputs=[detail_text],
-                outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img]
-            )
-
-            refrash_list_btn.click(
-                fn=refrash_list,
-                outputs=datatable
-            )
-
-            send_to_txt2img.click(
-                fn=send_txt2img_prompts,
-                inputs=[selected_text],
-                outputs=find_txt2img_prompts(ui.txt2img_paste_fields)
-            )
-
-            send_to_img2img.click(
-                fn=send_img2img_prompts,
-                inputs=[selected_text],
-                outputs=find_img2img_prompts(ui.img2img_paste_fields)
-            )
-
-            send_detail_to_txt2img.click(
-                fn=send_txt2img_prompts,
-                inputs=[detail_text],
-                outputs=find_txt2img_prompts(ui.txt2img_paste_fields),
-                _js="switch_to_txt2img"
-            )
-
-            send_detail_to_img2img.click(
-                fn=send_img2img_prompts,
-                inputs=[detail_text],
-                outputs=find_img2img_prompts(ui.img2img_paste_fields),
-                _js="switch_to_img2img"
-            )
+            save_to_template.click(fn=saveto_template, inputs=png_info_text)
+            img.upload(fn=get_png_info, inputs=img, outputs=[img_info, png_info_text])
+            detail_text_btn.click(fn=show_detail, inputs=[detail_text],
+                                  outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img])
+            refrash_list_btn.click(fn=refrash_list, outputs=datatable)
+            send_to_txt2img.click(fn=send_txt2img_prompts, inputs=[selected_text],
+                                  outputs=find_txt2img_prompts(ui.txt2img_paste_fields))
+            send_to_img2img.click(fn=send_img2img_prompts, inputs=[selected_text],
+                                  outputs=find_img2img_prompts(ui.img2img_paste_fields))
+            send_detail_to_txt2img.click(fn=send_txt2img_prompts, inputs=[detail_text],
+                                         outputs=find_txt2img_prompts(ui.txt2img_paste_fields), _js="switch_to_txt2img")
+            send_detail_to_img2img.click(fn=send_img2img_prompts, inputs=[detail_text],
+                                         outputs=find_img2img_prompts(ui.img2img_paste_fields), _js="switch_to_img2img")
+            add_template_send_to_txt2img.click(fn=send_txt2img_prompts, inputs=[png_info_text],
+                                               outputs=find_txt2img_prompts(ui.txt2img_paste_fields),
+                                               _js="switch_to_txt2img")
+            add_template_send_to_img2img.click(fn=send_img2img_prompts, inputs=[png_info_text],
+                                               outputs=find_img2img_prompts(ui.img2img_paste_fields),
+                                               _js="switch_to_img2img")
 
     return [(tab, "提示词模版", "prompt_template")]
 
