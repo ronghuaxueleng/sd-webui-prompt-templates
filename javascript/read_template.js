@@ -1,3 +1,10 @@
+function delete_template_onclick(id) {
+    textarea = gradioApp().querySelector('#delete_template_id textarea')
+    textarea.value = id
+    updateInput(textarea)
+    textarea.click()
+    gradioApp().querySelector('#delete_template_id_btn').click()
+}
 function jump_to_detail(encodeed_prompt_raw, filename) {
     gradioApp().querySelector('#tab_prompt_template').querySelectorAll('button')[1].click();
     textarea = gradioApp().querySelector('#prompt_detail_text textarea')

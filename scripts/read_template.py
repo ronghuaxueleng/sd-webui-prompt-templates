@@ -15,7 +15,6 @@ from modules import scripts, script_callbacks, ui, generation_parameters_copypas
 base_dir = scripts.basedir()
 pics_dir_path = base_dir + r"/pics"
 config_path = base_dir + r"/config.json"
-detail_html_path = base_dir + r"/detail.html"
 headers = ["预览", "正向提示词", "负向提示词", "操作"]
 paste_int_field_default_val_map = {}
 paste_field_name_map = {}
@@ -241,6 +240,7 @@ def add_tab():
                     selected_text = gr.TextArea(elem_id='prompt_selected_text', visible=False)
                     send_to_txt2img = gr.Button(elem_id='prompt_send_to_txt2img', visible=False)
                     send_to_img2img = gr.Button(elem_id='prompt_send_to_img2img', visible=False)
+                    delete_template_id = gr.TextArea(elem_id='delete_template_id', visible=False)
                 with gr.Row():
                     datatable = gr.DataFrame(headers=headers,
                                              datatype=["html", "str", "str", "html"],
