@@ -113,6 +113,7 @@ def find_img2img_prompts(fields):
 def send_prompts(encodeed_prompt_raw, paste_type):
     decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
+    params['Batch size'] = 1
     values = []
     for name in paste_field_name_map.get(paste_type).get('names'):
         val = params.get(name)
