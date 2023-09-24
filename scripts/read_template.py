@@ -100,7 +100,7 @@ def loadjsonfile():
 
 def find_prompts(fields, paste_type):
     for field, name in fields:
-        if isinstance(name, str):
+        if field.visible:
             paste_field_name_map.get(paste_type).get('names').append(name)
             paste_field_name_map.get(paste_type).get('fields').append(field)
     return paste_field_name_map.get(paste_type).get('fields')
