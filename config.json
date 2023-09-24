@@ -1,5 +1,6 @@
 {
   "paste_int_field_default_val_map": {
+    "Batch size": 1,
     "Seed": -1,
     "Variation seed": -1,
     "Variation seed strength": 0,

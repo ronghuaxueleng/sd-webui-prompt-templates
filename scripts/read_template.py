@@ -15,6 +15,10 @@ from modules import scripts, script_callbacks, ui, generation_parameters_copypas
 base_dir = scripts.basedir()
 pics_dir_path = base_dir + r"/pics"
 config_path = base_dir + r"/config.json"
+convert_map = {
+    'Size-1': 'Width',
+    'Size-2': 'Height'
+}
 headers = ["预览", "正向提示词", "负向提示词", "操作"]
 paste_int_field_default_val_map = {}
 paste_field_name_map = {}
@@ -113,20 +117,15 @@ def find_img2img_prompts(fields):
 def send_prompts(encodeed_prompt_raw, paste_type):
     decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
-    final_result = dict(paste_int_field_default_val_map)
-    final_result.update(params)
     values = []
     for name in paste_field_name_map.get(paste_type).get('names'):
-        val = final_result.get(name)
+        val = params.get(name)
         if val is None and name in paste_int_field_default_val_map.keys():
             val = paste_int_field_default_val_map.get(name)
         try:
             values.append(int(val))
         except:
-            try:
-                values.append(float(val))
-            except:
-                values.append(str(val))
+            values.append(str(val))
     return tuple(values) or gr.update()
 
 
@@ -162,7 +161,7 @@ def show_detail(encodeed_prompt_raw, filename):
     for key, value in params.items():
         html_conent += f"""
                 <label>
-                    <span>{key}</span>
+                    <span>{convert_map.get(key, key)}</span>
                     <span>{html.escape(str(value))}</span>
                 </label>
         """
@@ -192,7 +191,7 @@ def get_png_info(image):
     for key, value in params.items():
         html_conent += f"""
                 <label>
-                    <span>{key}</span>
+                    <span>{convert_map.get(key, key)}</span>
                     <span>{html.escape(str(value))}</span>
                 </label>
         """
