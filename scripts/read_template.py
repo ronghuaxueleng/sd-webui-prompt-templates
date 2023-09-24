@@ -134,7 +134,6 @@ def send_prompts(encodeed_prompt_raw, paste_type):
     return tuple(values) or gr.update()
 
 
-
 def send_txt2img_prompts(encodeed_prompt_raw):
     return send_prompts(encodeed_prompt_raw, 'txt2img')
 
