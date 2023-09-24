@@ -117,16 +117,22 @@ def find_img2img_prompts(fields):
 def send_prompts(encodeed_prompt_raw, paste_type):
     decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
+    final_result = dict(paste_int_field_default_val_map)
+    final_result.update(params)
     values = []
     for name in paste_field_name_map.get(paste_type).get('names'):
-        val = params.get(name)
+        val = final_result.get(name)
         if val is None and name in paste_int_field_default_val_map.keys():
             val = paste_int_field_default_val_map.get(name)
         try:
             values.append(int(val))
         except:
-            values.append(str(val))
+            try:
+                values.append(float(val))
+            except:
+                values.append(str(val))
     return tuple(values) or gr.update()
+
 
 
 def send_txt2img_prompts(encodeed_prompt_raw):
