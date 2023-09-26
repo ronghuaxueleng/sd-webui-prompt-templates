@@ -15,16 +15,14 @@ from modules import scripts, script_callbacks, ui, generation_parameters_copypas
 base_dir = scripts.basedir()
 pics_dir_path = base_dir + r"/pics"
 config_path = base_dir + r"/config.json"
-convert_map = {
-    'Size-1': 'Width',
-    'Size-2': 'Height'
-}
 headers = ["预览", "正向提示词", "负向提示词", "操作"]
 paste_int_field_default_val_map = {}
 paste_field_name_map = {}
+convert_map = {}
 
 with open(config_path, "r", encoding="utf-8-sig") as f:
     configs = json.loads(f.read())
+    convert_map = configs['convert_map']
     paste_field_name_map = configs['paste_field_name_map']
     paste_int_field_default_val_map = configs['paste_int_field_default_val_map']
 

@@ -10,6 +10,10 @@
     "Y Type": "Nothing",
     "Z Type": "Nothing"
   },
+  "convert_map": {
+    "Size-1": "Width",
+    "Size-2": "Height"
+  },
   "paste_field_name_map": {
     "img2img": {
       "names": [],
