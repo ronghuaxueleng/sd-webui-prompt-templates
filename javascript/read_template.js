@@ -48,7 +48,7 @@ function delete_template(id) {
     }
 }
 function jump_to_detail(encodeed_prompt_raw, filename) {
-    gradioApp().querySelector('#tab_prompt_template').querySelectorAll('button')[1].click();
+    gradioApp().querySelector('#tab_prompt_template #template_detail_tab').parentElement.querySelectorAll('button')[1].click();
     textarea = gradioApp().querySelector('#prompt_detail_text textarea')
     textarea.value = encodeed_prompt_raw
     updateInput(textarea)
