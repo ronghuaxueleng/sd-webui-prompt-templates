@@ -5,7 +5,8 @@ let closeBtn = document.getElementById('close');
 
 let toEnlargeImgs = document.getElementsByClassName('toEnlargeImg');
 
-for (let toEnlargeImg of toEnlargeImgs) {
+for (let i = 0; i < toEnlargeImgs.length; i++) {
+    let toEnlargeImg = toEnlargeImgs[i];
     toEnlargeImg.addEventListener('click', function () {
         // 获取当前图片的路径
         let imgUrl = this.src;
