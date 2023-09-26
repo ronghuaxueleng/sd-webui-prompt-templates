@@ -7,6 +7,7 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
     z-index: 100;
+    cursor: not-allowed;
 }
 
 #prompt_template_image_preview_close_enlargeContainer {
