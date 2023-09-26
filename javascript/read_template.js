@@ -37,6 +37,23 @@ let preview_init = function () {
                 prompt_template_image_preview_close_div.removeChild(prompt_template_image_preview_to_image.nextElementSibling);
             }
             prompt_template_image_preview_close_div.appendChild(img);
+
+            //绑定滚动事件
+            img.onwheel = function (event) {
+                const width = getComputedStyle(img).width.slice(0,-2);
+                const height = getComputedStyle(img).height.slice(0,-2);
+
+                if (event.deltaY > 0) {
+                    //向上滚动放大
+                    img.style.width = parseInt(width) * 1.1 + "px";
+                    img.style.height = parseInt(height) * 1.1 + "px";
+                }else if (event.deltaY < 0) {
+                    //向下滚动缩小
+                    img.style.width = parseInt(width) * 0.9 + "px";
+                    img.style.height = parseInt(height) * 0.9 + "px";
+                }
+            }
+
         });
     }
 
@@ -47,6 +64,7 @@ let preview_init = function () {
     });
 }
 onUiLoaded(preview_init)
+onAfterUiUpdate(preview_init)
 
 function delete_template(id) {
     if (confirm('确定要删除这个模版吗？')) {

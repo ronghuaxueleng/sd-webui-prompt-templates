@@ -85,6 +85,7 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
 
 #tab_prompt_template #preview-content > img {
     max-height: 600px;
+    cursor: pointer;
 }
 
 #tab_prompt_template #prompt-content h1 {

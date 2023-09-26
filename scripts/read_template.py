@@ -327,7 +327,7 @@ def add_tab():
                 fn=saveto_template_success, outputs=datatable, _js="function(){alert('保存成功，请到模版列表查看');}")
             img.upload(fn=get_png_info, inputs=img, outputs=[img_info, png_info_text])
             detail_text_btn.click(fn=show_detail, inputs=[detail_text, prompt_detail_filename_text],
-                                  outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img]).then(_js="preview_init")
+                                  outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img])
             refrash_list_btn.click(fn=refrash_list, outputs=datatable)
             delete_invalid_pre_image_btn.click(fn=delete_invalid_pre_image, _js="function(){alert('清理完毕');}")
             send_to_txt2img.click(fn=send_txt2img_prompts, inputs=[selected_text],
