@@ -1,98 +1,138 @@
-#prompt_main {
-    display: inline-block;
-}
+#prompt-templates {
+    .black_overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 100;
+    }
 
-#prompt_main #refrash_template_list, #delete_invalid_pre_image {
-    width: 100px;
-    margin-right: 5px
-}
+    .enlargeContainer {
+        display: none;
+    }
 
-.preview-img {
-    width: 200px;
-}
+    .enlargePreviewImg {
+        /*这里我设置的是：预览后放大的图片相对于整个页面定位*/
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
 
-#detail_send_to_btns {
-    display: inline-block;
-}
+        /*宽度设置为页面宽度的70%，高度自适应*/
+        width: 70%;
+        z-index: 200;
+    }
 
-#detail_send_to_btns > button {
-    margin-right: 5px;
-}
+    /*关闭预览*/
+    .close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        z-index: 200;
+    }
 
-th.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within,
-td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
-    --ring-color: none;
-}
+    #prompt_main {
+        display: inline-block;
+    }
 
-.info-content {
-    display: table;
-}
+    #prompt_main #refrash_template_list, #delete_invalid_pre_image {
+        width: 100px;
+        margin-right: 5px
+    }
 
-.info-content > .row {
-    display: flex;
-}
+    .preview-img {
+        width: 200px;
+    }
 
-#prompt-content {
-    display: table-cell;
-    padding: 25px 15px 25px 10px;
-    font: 12px Georgia, "Times New Roman", Times, serif;
-    color: #888;
-    border: 1px solid #E4E4E4;
-    overflow-y: scroll;
-    max-height: 600px;
-}
+    #detail_send_to_btns {
+        display: inline-block;
+    }
 
-#preview-content {
-    display: table-cell;
-    min-width: 400px;
-}
+    #detail_send_to_btns > button {
+        margin-right: 5px;
+    }
 
-#preview-content > img {
-    max-height: 600px;
-}
+    & th.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within,
+    & td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
+        --ring-color: none;
+    }
 
-#prompt-content h1 {
-    font-size: 25px;
-    padding: 0 0 10px 40px;
-    display: block;
-    border-bottom: 1px solid #E4E4E4;
-    margin: -10px -15px 30px -10px;;
-    color: #888;
-}
+    .info-content {
+        display: table;
+    }
 
-#prompt-content h1 > span {
-    display: block;
-    font-size: 11px;
-}
+    .info-content > .row {
+        display: flex;
+    }
 
-#prompt-content label {
-    display: block;
-    margin: 0;
-    min-height: 25px;
-    line-height: 25px;
-    padding: 10px 10px;
-    border-bottom: 1px solid #ccc;
-}
+    #prompt-content {
+        display: table-cell;
+        padding: 25px 15px 25px 10px;
+        font: 12px Georgia, "Times New Roman", Times, serif;
+        color: #888;
+        border: 1px solid #E4E4E4;
+        overflow-y: scroll;
+        max-height: 600px;
+    }
 
-#prompt-content label > span {
-    text-align: left;
-    padding-right: 10px;
-    margin-top: 10px;
-    min-width: 200px;
-    display: table-cell;
-}
+    #preview-content {
+        display: table-cell;
+        min-width: 400px;
+    }
 
-#prompt-content .button {
-    background: #E27575;
-    border: none;
-    padding: 10px 25px 10px 25px;
-    color: #FFF;
-    box-shadow: 1px 1px 5px #B6B6B6;
-    border-radius: 3px;
-    text-shadow: 1px 1px 1px #9E3F3F;
-    cursor: pointer;
-}
+    #preview-content > img {
+        max-height: 600px;
+    }
 
-#prompt-content .button:hover {
-    background: #CF7A7A
+    #prompt-content h1 {
+        font-size: 25px;
+        padding: 0 0 10px 40px;
+        display: block;
+        border-bottom: 1px solid #E4E4E4;
+        margin: -10px -15px 30px -10px;;
+        color: #888;
+    }
+
+    #prompt-content h1 > span {
+        display: block;
+        font-size: 11px;
+    }
+
+    #prompt-content label {
+        display: block;
+        margin: 0;
+        min-height: 25px;
+        line-height: 25px;
+        padding: 10px 10px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    #prompt-content label > span {
+        text-align: left;
+        padding-right: 10px;
+        margin-top: 10px;
+        min-width: 200px;
+        display: table-cell;
+    }
+
+    #prompt-content .button {
+        background: #E27575;
+        border: none;
+        padding: 10px 25px 10px 25px;
+        color: #FFF;
+        box-shadow: 1px 1px 5px #B6B6B6;
+        border-radius: 3px;
+        text-shadow: 1px 1px 1px #9E3F3F;
+        cursor: pointer;
+    }
+
+    #prompt-content .button:hover {
+        background: #CF7A7A
+    }
 }

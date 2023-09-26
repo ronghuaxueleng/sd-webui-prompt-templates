@@ -1,3 +1,30 @@
+
+let black_overlay = document.getElementById('black_overlay');
+let enlargeContainer = document.getElementById('enlargeContainer');
+let closeBtn = document.getElementById('close');
+
+let toEnlargeImg = document.querySelector('.toEnlargeImg');
+toEnlargeImg.addEventListener('click', function () {
+    // 获取当前图片的路径
+    let imgUrl = this.src;
+    // 显示黑色遮罩和预览容器
+    black_overlay.style.display = 'block';
+    enlargeContainer.style.display = 'block';
+    let img = new Image();
+    img.src = imgUrl;
+    img.classList.add('enlargePreviewImg');
+    if (closeBtn.nextElementSibling) {
+        enlargeContainer.removeChild(closeBtn.nextElementSibling);
+    }
+    enlargeContainer.appendChild(img);
+});
+
+// 关闭预览
+closeBtn.addEventListener('click', function () {
+    black_overlay.style.display = 'none';
+    enlargeContainer.style.display = 'none';
+});
+
 function delete_template(id) {
     if (confirm('确定要删除这个模版吗？')) {
         textarea = gradioApp().querySelector('#template_id textarea')
