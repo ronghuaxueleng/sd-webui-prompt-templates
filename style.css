@@ -1,6 +1,6 @@
-#prompt-templates .black_overlay {
+#prompt_template_image_preview_black_overlay {
     display: none;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -9,24 +9,21 @@
     z-index: 100;
 }
 
-#prompt-templates .enlargeContainer {
+#prompt_template_image_preview_close_enlargeContainer {
     display: none;
 }
 
-#prompt-templates .enlargePreviewImg {
+.prompt_template_image_preview_enlarge_previewimg {
     /*这里我设置的是：预览后放大的图片相对于整个页面定位*/
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-
-    /*宽度设置为页面宽度的70%，高度自适应*/
-    width: 70%;
     z-index: 200;
 }
 
 /*关闭预览*/
-#prompt-templates .close {
+.prompt_template_image_preview_to_image_close {
     position: absolute;
     top: 20px;
     right: 20px;
@@ -36,41 +33,41 @@
     z-index: 200;
 }
 
-#prompt-templates #prompt_main {
+#tab_prompt_template #prompt_main {
     display: inline-block;
 }
 
-#prompt-templates #prompt_main #refrash_template_list, #delete_invalid_pre_image {
+#tab_prompt_template #prompt_main #refrash_template_list, #delete_invalid_pre_image {
     width: 100px;
     margin-right: 5px
 }
 
-#prompt-templates .preview-img {
+#tab_prompt_template .preview-img {
     width: 200px;
 }
 
-#prompt-templates #detail_send_to_btns {
+#tab_prompt_template #detail_send_to_btns {
     display: inline-block;
 }
 
-#prompt-templates #detail_send_to_btns > button {
+#tab_prompt_template #detail_send_to_btns > button {
     margin-right: 5px;
 }
 
-#prompt-templates th.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within,
+#tab_prompt_template th.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within,
 td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     --ring-color: none;
 }
 
-#prompt-templates .info-content {
+#tab_prompt_template .info-content {
     display: table;
 }
 
-#prompt-templates .info-content > .row {
+#tab_prompt_template .info-content > .row {
     display: flex;
 }
 
-#prompt-templates #prompt-content {
+#tab_prompt_template #prompt-content {
     display: table-cell;
     padding: 25px 15px 25px 10px;
     font: 12px Georgia, "Times New Roman", Times, serif;
@@ -80,16 +77,16 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     max-height: 600px;
 }
 
-#prompt-templates #preview-content {
+#tab_prompt_template #preview-content {
     display: table-cell;
     min-width: 400px;
 }
 
-#prompt-templates #preview-content > img {
+#tab_prompt_template #preview-content > img {
     max-height: 600px;
 }
 
-#prompt-templates #prompt-content h1 {
+#tab_prompt_template #prompt-content h1 {
     font-size: 25px;
     padding: 0 0 10px 40px;
     display: block;
@@ -98,12 +95,12 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     color: #888;
 }
 
-#prompt-templates #prompt-content h1 > span {
+#tab_prompt_template #prompt-content h1 > span {
     display: block;
     font-size: 11px;
 }
 
-#prompt-templates #prompt-content label {
+#tab_prompt_template #prompt-content label {
     display: block;
     margin: 0;
     min-height: 25px;
@@ -112,7 +109,7 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     border-bottom: 1px solid #ccc;
 }
 
-#prompt-templates #prompt-content label > span {
+#tab_prompt_template #prompt-content label > span {
     text-align: left;
     padding-right: 10px;
     margin-top: 10px;
@@ -120,7 +117,7 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     display: table-cell;
 }
 
-#prompt-templates #prompt-content .button {
+#tab_prompt_template #prompt-content .button {
     background: #E27575;
     border: none;
     padding: 10px 25px 10px 25px;
@@ -131,6 +128,6 @@ td.svelte-1anhtf6.svelte-1anhtf6.svelte-1anhtf6:focus-within {
     cursor: pointer;
 }
 
-#prompt-templates #prompt-content .button:hover {
+#tab_prompt_template #prompt-content .button:hover {
     background: #CF7A7A
 }
