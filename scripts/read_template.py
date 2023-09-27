@@ -7,8 +7,9 @@ import pathlib
 import time
 
 import gradio as gr
-from PIL import UnidentifiedImageError, Image
+from PIL import UnidentifiedImageError
 
+from scripts.utils import make_thumb
 from scripts.db import Template
 from modules import scripts, script_callbacks, ui, generation_parameters_copypaste, images
 
@@ -25,27 +26,6 @@ with open(config_path, "r", encoding="utf-8-sig") as f:
     convert_map = configs['convert_map']
     paste_field_name_map = configs['paste_field_name_map']
     paste_int_field_default_val_map = configs['paste_int_field_default_val_map']
-
-
-def make_thumb(image, filename):
-    mode = image.mode
-    if mode not in ('L', 'RGB'):
-        if mode == 'RGBA':
-            # 透明图片需要加白色底
-            alpha = image.split()[3]
-            bgmask = alpha.point(lambda x: 255 - x)
-            image = image.convert('RGB')
-            # paste(color, box, mask)
-            image.paste((255, 255, 255), None, bgmask)
-        else:
-            image = image.convert('RGB')
-    _height = 600
-    width, height = image.size
-    _width = int(width * _height / height)
-    filename = pics_dir_path + "/" + filename
-    thumb = image.resize((_width, _height), Image.BILINEAR)
-    print(filename)
-    thumb.save(filename, quality=100)  # 默认 JPEG 保存质量是 75, 不太清楚。可选值(0~100)
 
 
 def loadjsonfile():
@@ -213,7 +193,7 @@ def get_png_info(image):
 
 def saveto_template(encodeed_prompt_raw, image):
     filename = hashlib.md5(encodeed_prompt_raw.encode()).hexdigest() + ".jpg"
-    make_thumb(image, filename)
+    make_thumb(image, pics_dir_path, filename)
     decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
     Template.insert(
