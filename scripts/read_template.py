@@ -81,11 +81,12 @@ def find_prompts(fields, paste_type):
     print(paste_type + ' has labels:')
     for field, name in fields:
         try:
-            print(field.label)
-            paste_field_name_map.get(paste_type).get('names').append(name)
-            paste_field_name_map.get(paste_type).get('fields').append(field)
+            if field.label == name:
+                paste_field_name_map.get(paste_type).get('names').append(name)
+                paste_field_name_map.get(paste_type).get('fields').append(field)
         except:
             pass
+    print(paste_field_name_map.get(paste_type).get('names'))
     return paste_field_name_map.get(paste_type).get('fields')
 
 
