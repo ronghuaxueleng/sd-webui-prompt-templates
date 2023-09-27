@@ -237,8 +237,14 @@ def delete_template_by_id(template_id):
     return refrash_list()
 
 
+def save_all_flow_to_template():
+    fields = ui.txt2img_paste_fields
+    pass
+
+
 def add_tab():
     with gr.Blocks(analytics_enabled=False) as tab:
+        save_all_flow_to_template_btn = gr.Button(elem_id='save_flow_to_template_btn', visible=False)
         template_id = gr.TextArea(elem_id='template_id', visible=False)
         delete_template_by_id_btn = gr.Button(elem_id='delete_template_by_id_btn', visible=False)
         with gr.Row():
@@ -324,6 +330,8 @@ def add_tab():
             add_template_send_to_img2img.click(fn=send_img2img_prompts, inputs=[png_info_text],
                                                outputs=find_img2img_prompts(ui.img2img_paste_fields),
                                                _js="switch_to_img2img")
+
+        save_all_flow_to_template_btn.click(fn=save_all_flow_to_template)
 
     return [(tab, "提示词模版", "prompt_template")]
 

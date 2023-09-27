@@ -76,6 +76,11 @@ onUiLoaded(function () {
     save_all_flow_to_template_btn.className = "gr-button gr-button-lg gr-button-tool lg secondary gradio-button tool";
     save_all_flow_to_template_btn.style.border = "none";
     save_all_flow_to_template_btn.title = "保存流程到模板";
+
+    save_all_flow_to_template_btn.onclick = function () {
+        gradioApp().getElementById("save_flow_to_template_btn").click();
+    };
+
     toolbar.appendChild(save_all_flow_to_template_btn);
     let modelbar = gradioApp().getElementById("quicksettings");
     modelbar.appendChild(toolbar);
