@@ -241,6 +241,13 @@ def delete_template_by_id(template_id):
 
 def save_all_flow_to_template():
     fields = ui.txt2img_paste_fields
+    value_map = {}
+    for field, name in fields:
+        try:
+            label = name if isinstance(name, str) else field.label
+            value_map[label] = field.value
+        except:
+            pass
     pass
 
 
