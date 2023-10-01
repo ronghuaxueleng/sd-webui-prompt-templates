@@ -9,8 +9,8 @@ import time
 import gradio as gr
 from PIL import UnidentifiedImageError
 
-from utils import make_thumb
-from db import Template
+from scripts.jishui.utils import make_thumb
+from scripts.jishui.db import Template
 from modules import scripts, script_callbacks, ui, generation_parameters_copypaste, images
 
 base_dir = scripts.basedir()

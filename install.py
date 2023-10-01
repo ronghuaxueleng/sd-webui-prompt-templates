@@ -16,5 +16,5 @@ for pkg in pkgs:
 base_dir = scripts.basedir()
 template_path = pathlib.Path(base_dir + '/template.db')
 if not template_path.exists():
-    from scripts.db import init_table
+    from scripts.jishui.db import init_table
     init_table()
