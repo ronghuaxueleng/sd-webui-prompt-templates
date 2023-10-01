@@ -46,12 +46,12 @@ let preview_init = function () {
 
                 if (event.deltaY > 0) {
                     //向上滚动放大
-                    img.style.width = parseInt(width) * 1.1 + "px";
-                    img.style.height = parseInt(height) * 1.1 + "px";
-                } else if (event.deltaY < 0) {
-                    //向下滚动缩小
                     img.style.width = parseInt(width) * 0.9 + "px";
                     img.style.height = parseInt(height) * 0.9 + "px";
+                } else if (event.deltaY < 0) {
+                    //向下滚动缩小
+                    img.style.width = parseInt(width) * 1.1 + "px";
+                    img.style.height = parseInt(height) * 1.1 + "px";
                 }
             }
 
