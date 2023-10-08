@@ -251,6 +251,7 @@ def save_all_flow_to_template():
             value_map[label] = field.value
         except Exception as e:
             print(e)
+    print(json.dumps(value_map))
     pass
 
 

@@ -31,7 +31,7 @@
     "Seed resize from-2": 0,
     "ADetailer enable": false,
     "ADetailer skip img2img": false,
-    "ADetailer model": "mediapipe_face_full",
+    "ADetailer model": "face_yolov8n.pt",
     "ADetailer prompt": "",
     "ADetailer negative prompt": "",
     "ADetailer confidence": 0.3,
