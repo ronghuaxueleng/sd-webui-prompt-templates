@@ -78,16 +78,19 @@ def loadjsonfile():
 
 
 def find_prompts(fields, paste_type):
-    print(paste_type + ' has labels:')
-    labels = []
-    for field, name in fields:
-        try:
-            labels.append(field.label)
-            paste_field_name_map.get(paste_type).get('names').append(name)
-            paste_field_name_map.get(paste_type).get('fields').append(field)
-        except:
-            pass
-    print(labels)
+    if not paste_field_name_map.get(paste_type).get('isInit'):
+        print(paste_type + ' has labels:')
+        labels = []
+        for field, name in fields:
+            try:
+                label = name if isinstance(name, str) else field.label
+                labels.append(label)
+                paste_field_name_map.get(paste_type).get('names').append(label)
+                paste_field_name_map.get(paste_type).get('fields').append(field)
+            except:
+                pass
+        print(labels)
+        paste_field_name_map.get(paste_type).update({'isInit': True})
     return paste_field_name_map.get(paste_type).get('fields')
 
 
@@ -246,8 +249,8 @@ def save_all_flow_to_template():
         try:
             label = name if isinstance(name, str) else field.label
             value_map[label] = field.value
-        except:
-            pass
+        except Exception as e:
+            print(e)
     pass
 
 
