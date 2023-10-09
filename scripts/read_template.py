@@ -110,8 +110,6 @@ def send_prompts(encodeed_prompt_raw, paste_type):
     values = []
     for name in paste_field_name_map.get(paste_type).get('names'):
         val = final_result.get(name)
-        if val is None and name in paste_int_field_default_val_map.keys():
-            val = paste_int_field_default_val_map.get(name)
         try:
             values.append(int(val))
         except:
