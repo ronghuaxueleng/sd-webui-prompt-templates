@@ -99,7 +99,7 @@ function delete_template(id) {
 function jump_to_detail(encodeed_prompt_raw, filename) {
     gradioApp().querySelector('#tab_prompt_template #template_detail_tab').parentElement.querySelectorAll('button')[1].click();
     let textarea = gradioApp().querySelector('#prompt_detail_text textarea')
-    textarea.value = encodeed_prompt_raw
+    textarea.value = atob(encodeed_prompt_raw)
     updateInput(textarea)
     let filename_textarea = gradioApp().querySelector('#prompt_detail_filename_text textarea')
     filename_textarea.value = filename
@@ -122,6 +122,4 @@ function prompt_send_to(where, text) {
     updateInput(textarea)
 
     gradioApp().querySelector('#prompt_send_to_' + where).click()
-
-    // where === 'txt2img' ? switch_to_txt2img() : switch_to_img2img()
 }

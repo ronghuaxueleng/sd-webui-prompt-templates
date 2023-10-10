@@ -141,8 +141,7 @@ def refrash_list():
     return gr.Dataframe.update(value=loadjsonfile())
 
 
-def show_detail(encodeed_prompt_raw, filename):
-    decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
+def show_detail(decodeed_prompt_raw, filename):
     params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
     with open(pics_dir_path + "/" + filename, "rb") as f:
         imagebytes = base64.b64encode(f.read())
@@ -178,7 +177,6 @@ def get_png_info(image):
         pnginfo, items = images.read_info_from_image(image)
     except UnidentifiedImageError as e:
         pnginfo = None
-    pnginfo_encode = base64.b64encode(str(pnginfo).encode("utf-8")).decode('utf-8')
     params = generation_parameters_copypaste.parse_generation_parameters(str(pnginfo))
     html_conent = f"""
     <div class="info-content">
@@ -200,7 +198,7 @@ def get_png_info(image):
         </div>
     </div>
     """
-    return html_conent, gr.TextArea.update(value=pnginfo_encode)
+    return html_conent, gr.TextArea.update(value=str(pnginfo))
 
 
 def saveto_template(encodeed_prompt_raw, image):
@@ -336,25 +334,30 @@ def add_tab():
                                   outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img])
             refrash_list_btn.click(fn=refrash_list, outputs=datatable)
             delete_invalid_pre_image_btn.click(fn=delete_invalid_pre_image, _js="function(){alert('清理完毕');}")
-            # send_to_txt2img.click(fn=send_txt2img_prompts, inputs=[selected_text],
-            #                       outputs=find_txt2img_prompts(ui.txt2img_paste_fields))
 
             generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(
                 paste_button=send_to_txt2img, tabname="txt2img", source_text_component=selected_text,
             ))
 
-            send_to_img2img.click(fn=send_img2img_prompts, inputs=[selected_text],
-                                  outputs=find_img2img_prompts(ui.img2img_paste_fields))
-            send_detail_to_txt2img.click(fn=send_txt2img_prompts, inputs=[detail_text],
-                                         outputs=find_txt2img_prompts(ui.txt2img_paste_fields), _js="switch_to_txt2img")
-            send_detail_to_img2img.click(fn=send_img2img_prompts, inputs=[detail_text],
-                                         outputs=find_img2img_prompts(ui.img2img_paste_fields), _js="switch_to_img2img")
-            add_template_send_to_txt2img.click(fn=send_txt2img_prompts, inputs=[png_info_text],
-                                               outputs=find_txt2img_prompts(ui.txt2img_paste_fields),
-                                               _js="switch_to_txt2img")
-            add_template_send_to_img2img.click(fn=send_img2img_prompts, inputs=[png_info_text],
-                                               outputs=find_img2img_prompts(ui.img2img_paste_fields),
-                                               _js="switch_to_img2img")
+            generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(
+                paste_button=send_to_img2img, tabname="img2img", source_text_component=selected_text,
+            ))
+
+            generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(
+                paste_button=send_detail_to_txt2img, tabname="txt2img", source_text_component=detail_text,
+            ))
+
+            generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(
+                paste_button=send_detail_to_img2img, tabname="img2img", source_text_component=detail_text,
+            ))
+
+            generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(
+                paste_button=add_template_send_to_txt2img, tabname="txt2img", source_text_component=png_info_text,
+            ))
+
+            generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(
+                paste_button=add_template_send_to_img2img, tabname="img2img", source_text_component=png_info_text,
+            ))
 
         save_all_flow_to_template_btn.click(fn=save_all_flow_to_template)
 
