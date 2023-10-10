@@ -108,15 +108,24 @@ def send_prompts(encodeed_prompt_raw, paste_type):
     final_result = dict(paste_int_field_default_val_map)
     final_result.update(params)
     values = []
-    for name in paste_field_name_map.get(paste_type).get('names'):
+    type_map = paste_field_name_map.get(paste_type)
+    names = type_map.get('names')
+    fields = type_map.get('fields')
+    for inx, name in enumerate(names):
         val = final_result.get(name)
-        try:
+        value = fields[inx].value
+        if type(value) == int:
             values.append(int(val))
-        except:
-            try:
-                values.append(float(val))
-            except:
-                values.append(str(val))
+        elif type(value) == float:
+            values.append(float(val))
+        elif type(value) == bool:
+            values.append(bool(val))
+        elif type(value) == list:
+            values.append(list(val))
+        elif type(value) == str:
+            values.append(str(val))
+        else:
+            values.append(str(val))
     return tuple(values) or gr.update()
 
 
