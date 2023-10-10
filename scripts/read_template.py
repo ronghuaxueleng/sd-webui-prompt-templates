@@ -340,7 +340,7 @@ def add_tab():
             #                       outputs=find_txt2img_prompts(ui.txt2img_paste_fields))
 
             generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(
-                paste_button=send_to_txt2img, tabname="txt2img", source_text_component=selected_text, source_image_component=None,
+                paste_button=send_to_txt2img, tabname="txt2img", source_text_component=selected_text,
             ))
 
             send_to_img2img.click(fn=send_img2img_prompts, inputs=[selected_text],
