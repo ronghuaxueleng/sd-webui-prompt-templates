@@ -336,8 +336,13 @@ def add_tab():
                                   outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img])
             refrash_list_btn.click(fn=refrash_list, outputs=datatable)
             delete_invalid_pre_image_btn.click(fn=delete_invalid_pre_image, _js="function(){alert('清理完毕');}")
-            send_to_txt2img.click(fn=send_txt2img_prompts, inputs=[selected_text],
-                                  outputs=find_txt2img_prompts(ui.txt2img_paste_fields))
+            # send_to_txt2img.click(fn=send_txt2img_prompts, inputs=[selected_text],
+            #                       outputs=find_txt2img_prompts(ui.txt2img_paste_fields))
+
+            generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(
+                paste_button=send_to_txt2img, tabname="txt2img", source_text_component=selected_text, source_image_component=None,
+            ))
+
             send_to_img2img.click(fn=send_img2img_prompts, inputs=[selected_text],
                                   outputs=find_img2img_prompts(ui.img2img_paste_fields))
             send_detail_to_txt2img.click(fn=send_txt2img_prompts, inputs=[detail_text],
