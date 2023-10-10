@@ -201,15 +201,14 @@ def get_png_info(image):
     return html_conent, gr.TextArea.update(value=str(pnginfo))
 
 
-def saveto_template(encodeed_prompt_raw, image):
-    filename = hashlib.md5(encodeed_prompt_raw.encode()).hexdigest() + ".jpg"
+def saveto_template(prompt_raw, image):
+    filename = hashlib.md5(prompt_raw.encode()).hexdigest() + ".jpg"
     make_thumb(image, pics_dir_path, filename)
-    decodeed_prompt_raw = base64.b64decode(encodeed_prompt_raw).decode('utf-8')
-    params = generation_parameters_copypaste.parse_generation_parameters(decodeed_prompt_raw)
+    params = generation_parameters_copypaste.parse_generation_parameters(prompt_raw)
     Template.insert(
         prompt=params['Prompt'],
         negativePrompt=params['Negative prompt'],
-        raw=decodeed_prompt_raw,
+        raw=prompt_raw,
         filename=filename,
         state=0,
         timestamp=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
