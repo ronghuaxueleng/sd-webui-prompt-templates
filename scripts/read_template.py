@@ -16,7 +16,10 @@ from modules import scripts, script_callbacks, ui, generation_parameters_copypas
 base_dir = scripts.basedir()
 pics_dir_path = base_dir + r"/pics"
 config_path = base_dir + r"/config.json"
-headers = ["预览", "正向提示词", "负向提示词", "操作"]
+headers = []
+datatype = []
+headers_with_translate = []
+datatype_with_translate = []
 paste_int_field_default_val_map = {}
 paste_field_name_map = {}
 convert_map = {}
@@ -24,11 +27,15 @@ convert_map = {}
 with open(config_path, "r", encoding="utf-8-sig") as f:
     configs = json.loads(f.read())
     convert_map = configs['convert_map']
+    headers = configs['tableInfo']['headers']
+    datatype = configs['tableInfo']['datatype']
     paste_field_name_map = configs['paste_field_name_map']
+    headers_with_translate = configs['tableInfo']['headers_with_translate']
+    datatype_with_translate = configs['tableInfo']['datatype_with_translate']
     paste_int_field_default_val_map = configs['paste_int_field_default_val_map']
 
 
-def loadjsonfile():
+def load_template_list():
     try:
         templates = Template.select()
         if len(templates) > 0:
@@ -137,8 +144,11 @@ def send_img2img_prompts(encodeed_prompt_raw):
     return send_prompts(encodeed_prompt_raw, 'img2img')
 
 
-def refrash_list():
-    return gr.Dataframe.update(value=loadjsonfile())
+def refrash_list(show_translate_colum_checkbox=False):
+    if show_translate_colum_checkbox:
+        return gr.Dataframe.update(value=load_template_list(), headers=headers_with_translate,
+                                   datatype=datatype_with_translate)
+    return gr.Dataframe.update(value=load_template_list())
 
 
 def show_detail(decodeed_prompt_raw, filename):
@@ -215,8 +225,8 @@ def saveto_template(prompt_raw, image):
     ).execute()
 
 
-def saveto_template_success():
-    return refrash_list()
+def saveto_template_success(show_translate_colum_checkbox):
+    return refrash_list(show_translate_colum_checkbox)
 
 
 def delete_invalid_pre_image():
@@ -234,7 +244,7 @@ def delete_invalid_pre_image():
         pass
 
 
-def delete_template_by_id(template_id):
+def delete_template_by_id(template_id, show_translate_colum_checkbox):
     templateObj = Template.get(Template.id == template_id)
     Template.delete().where(Template.id == template_id).execute()
     imgFile = pathlib.Path(pics_dir_path + '/' + templateObj.filename)
@@ -243,7 +253,7 @@ def delete_template_by_id(template_id):
             imgFile.unlink()
         except Exception as e:
             print(e)
-    return refrash_list()
+    return refrash_list(show_translate_colum_checkbox)
 
 
 def save_all_flow_to_template():
@@ -267,6 +277,7 @@ def add_tab():
         with gr.Row():
             with gr.Tab(label='模版列表', elem_id="template_list_tab"):
                 with gr.Row(elem_id="prompt_main"):
+                    show_translate_colum_checkbox = gr.Checkbox(label="翻译提示词", elem_id="show_translate_colum")
                     refrash_list_btn = gr.Button(elem_id='refrash_template_list', value='刷新')
                     delete_invalid_pre_image_btn = gr.Button(elem_id='delete_invalid_pre_image',
                                                              value='清除无效预览图')
@@ -275,13 +286,13 @@ def add_tab():
                     send_to_img2img = gr.Button(elem_id='prompt_send_to_img2img', visible=False)
                 with gr.Row():
                     datatable = gr.DataFrame(headers=headers,
-                                             datatype=["html", "str", "str", "html"],
+                                             datatype=datatype,
                                              interactive=False,
                                              wrap=True,
                                              max_rows=10,
                                              show_label=True,
                                              overflow_row_behaviour="show_ends",
-                                             value=loadjsonfile(),
+                                             value=load_template_list(),
                                              elem_id="prompt_template_list"
                                              )
 
@@ -325,13 +336,15 @@ def add_tab():
                     with gr.Column(scale=4):
                         img_info = gr.HTML()
 
-            delete_template_by_id_btn.click(fn=delete_template_by_id, inputs=template_id, outputs=datatable)
+            delete_template_by_id_btn.click(fn=delete_template_by_id,
+                                            inputs=[template_id, show_translate_colum_checkbox], outputs=datatable)
             save_to_template.click(fn=saveto_template, inputs=[png_info_text, img]).success(
-                fn=saveto_template_success, outputs=datatable, _js="function(){alert('保存成功，请到模版列表查看');}")
+                fn=saveto_template_success, inputs=show_translate_colum_checkbox, outputs=datatable,
+                _js="function(){alert('保存成功，请到模版列表查看');}")
             img.upload(fn=get_png_info, inputs=img, outputs=[img_info, png_info_text])
             detail_text_btn.click(fn=show_detail, inputs=[detail_text, prompt_detail_filename_text],
                                   outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img])
-            refrash_list_btn.click(fn=refrash_list, outputs=datatable)
+            refrash_list_btn.click(fn=refrash_list, inputs=show_translate_colum_checkbox, outputs=datatable)
             delete_invalid_pre_image_btn.click(fn=delete_invalid_pre_image, _js="function(){alert('清理完毕');}")
 
             generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(

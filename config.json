@@ -287,5 +287,35 @@
       "fields": [],
       "isInit": false
     }
+  },
+  "tableInfo": {
+    "headers": [
+      "预览",
+      "正向提示词",
+      "负向提示词",
+      "操作"
+    ],
+    "datatype": [
+      "html",
+      "str",
+      "str",
+      "html"
+    ],
+    "headers_with_translate": [
+      "预览",
+      "正向提示词",
+      "翻译",
+      "负向提示词",
+      "翻译",
+      "操作"
+    ],
+    "datatype_with_translate": [
+      "html",
+      "str",
+      "str",
+      "str",
+      "str",
+      "html"
+    ]
   }
 }
