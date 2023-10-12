@@ -35,7 +35,7 @@ with open(config_path, "r", encoding="utf-8-sig") as f:
     paste_int_field_default_val_map = configs['paste_int_field_default_val_map']
 
 
-def load_template_list():
+def load_template_list(show_translate_colum):
     try:
         templates = Template.select()
         if len(templates) > 0:
@@ -144,11 +144,8 @@ def send_img2img_prompts(encodeed_prompt_raw):
     return send_prompts(encodeed_prompt_raw, 'img2img')
 
 
-def refrash_list(show_translate_colum_checkbox=False):
-    if show_translate_colum_checkbox:
-        return gr.Dataframe.update(value=load_template_list(), headers=headers_with_translate,
-                                   datatype=datatype_with_translate)
-    return gr.Dataframe.update(value=load_template_list())
+def refrash_list(show_translate_colum):
+    return gr.Dataframe.update(value=load_template_list(show_translate_colum))
 
 
 def show_detail(decodeed_prompt_raw, filename):
@@ -292,7 +289,7 @@ def add_tab():
                                              max_rows=10,
                                              show_label=True,
                                              overflow_row_behaviour="show_ends",
-                                             value=load_template_list(),
+                                             value=load_template_list(show_translate_colum_checkbox),
                                              elem_id="prompt_template_list"
                                              )
 
