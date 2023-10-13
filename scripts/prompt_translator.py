@@ -16,7 +16,7 @@ from modules import script_callbacks
 import scripts.lang_config as lang_config
 from transformers import MarianMTModel, MarianTokenizer
 
-trans_setting = lang_config.trans_setting
+trans_setting = {}
 
 config_file_name = os.path.join(scripts.basedir(), "prompt_translator.cfg")
 
@@ -25,30 +25,24 @@ MarianMT_model_prefix = "Helsinki-NLP/opus-mt-"
 active_MarianMT_model_dict = {}
 active_MarianMT_tokenizer_dict = {}
 
-def load_trans_setting():
-    global trans_setting
 
+def load_trans_setting():
     if not os.path.isfile(config_file_name):
         print("没有发现配置文件: " + config_file_name)
         return
 
-    data = None
     with open(config_file_name, 'r') as f:
-        data = json.load(f)
+        trans_setting = json.load(f)
 
     # check error
-    if not data:
+    if not trans_setting:
         print("加载配置文件失败")
         return
 
-    for key in trans_setting.keys():
-        if key not in data.keys():
-            data[key] = trans_setting[key]
+    for key in lang_config.trans_setting.keys():
+        if key not in trans_setting.keys():
+            trans_setting[key] = lang_config.trans_setting[key]
             print("无效的配置【 " + key + "】，使用默认配置")
-
-    # set value
-    trans_setting = data
-    return
 
 
 load_trans_setting()
@@ -78,9 +72,11 @@ def load_MarianMT_model(lang_pair):
 
         if not os.path.exists(model_path):
             print("Get tokenizer")
-            active_MarianMT_tokenizer_dict[lang_pair] = MarianTokenizer.from_pretrained(model_name, cache_dir=MarianMT_model_folder)
+            active_MarianMT_tokenizer_dict[lang_pair] = MarianTokenizer.from_pretrained(model_name,
+                                                                                        cache_dir=MarianMT_model_folder)
             print("Load Model")
-            active_MarianMT_model_dict[lang_pair] = MarianMTModel.from_pretrained(model_name, cache_dir=MarianMT_model_folder)
+            active_MarianMT_model_dict[lang_pair] = MarianMTModel.from_pretrained(model_name,
+                                                                                  cache_dir=MarianMT_model_folder)
         else:
             print("Get tokenizer")
             active_MarianMT_tokenizer_dict[lang_pair] = MarianTokenizer.from_pretrained(model_path)
@@ -333,7 +329,6 @@ def do_send_prompt(translated_text):
 
 def save_trans_setting(provider, app_id, app_key):
     print("Saving tranlation service setting...")
-    global trans_setting
 
     # check error
     if not provider:
