@@ -9,6 +9,10 @@ lang_code_dict = {
     "tencent": {
         "英语": "en",
         "中文": "zh"
+    },
+    "MarianMT": {
+        "中文": "en-zh",
+        "英语": "zh-en"
     }
 }
 
@@ -36,12 +40,12 @@ trans_setting = {
         "app_key": ""
     },
     "tencent": {
-        "is_default": True,
+        "is_default": False,
         "app_id": "",
         "app_key": ""
     },
     "MarianMT": {
-        "is_default": False,
+        "is_default": True,
         "app_id": "",
         "app_key": ""
     }

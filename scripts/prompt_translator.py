@@ -18,24 +18,18 @@ from transformers import MarianMTModel, MarianTokenizer
 
 trans_setting = lang_config.trans_setting
 
-# user config file
-# use scripts.basedir() to get current extension's folder
 config_file_name = os.path.join(scripts.basedir(), "prompt_translator.cfg")
 
-# scan MarianMT Model
 MarianMT_model_folder = os.path.join(scripts.basedir(), "models")
-MarianMT_model_prefix = "opus-mt-"
-MarianMT_model_lang_pairs = []
+MarianMT_model_prefix = "Helsinki-NLP/opus-mt-"
+active_MarianMT_model_dict = {}
+active_MarianMT_tokenizer_dict = {}
 
-
-# init setting
-# load translation serivce setting
 def load_trans_setting():
-    # load data into globel trans_setting
     global trans_setting
 
     if not os.path.isfile(config_file_name):
-        print("no config file: " + config_file_name)
+        print("没有发现配置文件: " + config_file_name)
         return
 
     data = None
@@ -44,13 +38,13 @@ def load_trans_setting():
 
     # check error
     if not data:
-        print("load config file failed")
+        print("加载配置文件失败")
         return
 
     for key in trans_setting.keys():
         if key not in data.keys():
             data[key] = trans_setting[key]
-            print("can not find " + key + " section in config file, use default")
+            print("无效的配置【 " + key + "】，使用默认配置")
 
     # set value
     trans_setting = data
@@ -59,97 +53,46 @@ def load_trans_setting():
 
 load_trans_setting()
 
-# get provider
 providers = list(lang_config.trans_providers.keys())
-provider_name = "tencent"
+provider_name = "MarianMT"
 for key in trans_setting.keys():
     if trans_setting[key]["is_default"]:
         provider_name = key
         break
 
-# target languages
+# 目标语言
 tar_langs = [""]
 def_tar_lang = ""
-if provider_name != "MarianMT":
-    if provider_name in lang_config.lang_code_dict.keys():
-        tar_langs = list(lang_config.lang_code_dict[provider_name].keys())
-        def_tar_lang = str(tar_langs[0])
-
-
-# MarianMT_model
-def scan_MarianMT_model():
-    print("Scan MarianMT model")
-    global MarianMT_model_lang_pairs
-
-    if not os.path.isdir(MarianMT_model_folder):
-        print("No MarianMT folder, no need scan")
-        return
-
-    for name in os.listdir(MarianMT_model_folder):
-        item_path = os.path.join(MarianMT_model_folder, name)
-        if os.path.isdir(item_path):
-            # check name
-            if name.startswith(MarianMT_model_prefix):
-                # find model
-                # get language pair
-                lang_pair = name[len(MarianMT_model_prefix):]
-                if lang_pair:
-                    MarianMT_model_lang_pairs.append(lang_pair)
-
-    print(f"find MarianMT_model language pair: {MarianMT_model_lang_pairs}")
-
-
-# Scan local translation models
-scan_MarianMT_model()
+if provider_name in lang_config.lang_code_dict.keys():
+    tar_langs = list(lang_config.lang_code_dict[provider_name].keys())
+    def_tar_lang = str(tar_langs[0])
 
 
 def load_MarianMT_model(lang_pair):
-    global active_MarianMT_model
-    global active_MarianMT_tokenizer
+    active_MarianMT_model = active_MarianMT_model_dict.get(lang_pair)
+    active_MarianMT_tokenizer = active_MarianMT_tokenizer_dict.get(lang_pair)
+    if not active_MarianMT_tokenizer and not active_MarianMT_model:
+        model_name = MarianMT_model_prefix + lang_pair
+        model_path = os.path.join(MarianMT_model_folder, model_name)
+        print("MarianMT model_path: " + model_path)
 
-    model_name = MarianMT_model_prefix + lang_pair
-    model_path = os.path.join(MarianMT_model_folder, model_name)
-    print("MarianMT model_path: " + model_path)
-
-    if not os.path.isdir(model_path):
-        print("model_path is not a dir: " + model_path)
-        return
-
-    print("Get tokenizer")
-    active_MarianMT_tokenizer = MarianTokenizer.from_pretrained(model_path)
-    print("Load Model")
-    active_MarianMT_model = MarianMTModel.from_pretrained(model_path)
+        if not os.path.exists(model_path):
+            print("Get tokenizer")
+            active_MarianMT_tokenizer_dict[lang_pair] = MarianTokenizer.from_pretrained(model_name, cache_dir=MarianMT_model_folder)
+            print("Load Model")
+            active_MarianMT_model_dict[lang_pair] = MarianMTModel.from_pretrained(model_name, cache_dir=MarianMT_model_folder)
+        else:
+            print("Get tokenizer")
+            active_MarianMT_tokenizer_dict[lang_pair] = MarianTokenizer.from_pretrained(model_path)
+            print("Load Model")
+            active_MarianMT_model_dict[lang_pair] = MarianMTModel.from_pretrained(model_path)
 
 
-# pre-load MarianMT Model
-active_MarianMT_model = None
-active_MarianMT_tokenizer = None
 if provider_name == "MarianMT":
-    # reset 
-    tar_langs = [""]
-    def_tar_lang = ""
-    # use language pair as tar_lang list
-    tar_langs = MarianMT_model_lang_pairs
-    # get default value
-    if len(MarianMT_model_lang_pairs):
-        # use "-en" model as default value
-        for lang_pair in MarianMT_model_lang_pairs:
-            if lang_pair.endswith("-en"):
-                def_tar_lang = lang_pair
-                break
-
-        # if there is no "-en" model, use first one
-        if not def_tar_lang:
-            def_tar_lang = MarianMT_model_lang_pairs[0]
-
-    if def_tar_lang:
-        load_MarianMT_model(def_tar_lang)
+    tar_lang = lang_config.lang_code_dict[provider_name][def_tar_lang]
+    load_MarianMT_model(tar_lang)
 
 
-# baidu translator
-# refer: https://fanyi-api.baidu.com/doc/21
-# parameter: app_id, app_key, text, tar_lang
-# return: translated_text
 def baidu_trans(app_id, app_key, text, tar_lang):
     print("Getting data for baidu")
     # check error
@@ -303,10 +246,6 @@ def tencent_trans(secret_id, secret_key, text, tar_lang):
         return ""
 
 
-# deepl translator
-# refer: https://huggingface.co/docs/transformers/model_doc/marian
-# parameter: app_key, text, language_pair(like zh-en)
-# return: translated_text
 def MarianMT_trans(text, lang_pair):
     print("Getting data for MarianMT")
     # check error
@@ -318,9 +257,8 @@ def MarianMT_trans(text, lang_pair):
         print("language pair can not be empty")
         return ""
 
-    if lang_pair not in MarianMT_model_lang_pairs:
-        print(f"unknow language pair: {lang_pair}")
-        return ""
+    active_MarianMT_model = active_MarianMT_model_dict.get(lang_pair)
+    active_MarianMT_tokenizer = active_MarianMT_tokenizer_dict.get(lang_pair)
 
     # load model
     if not active_MarianMT_model or not active_MarianMT_tokenizer:
@@ -344,9 +282,6 @@ def MarianMT_trans(text, lang_pair):
     return translated_text
 
 
-# do translation
-# parameter: provider, app_id, app_key, text
-# return: translated_text
 def do_trans(provider, app_id, app_key, text, tar_lang):
     print("====Translation start====")
     print("Use Serivce: " + provider)
@@ -371,7 +306,7 @@ def do_trans(provider, app_id, app_key, text, tar_lang):
     elif provider == "tencent":
         translated_text = tencent_trans(app_id, app_key, text, tar_lang_code)
     elif provider == "MarianMT":
-        translated_text = MarianMT_trans(text, tar_lang)
+        translated_text = MarianMT_trans(text, tar_lang_code)
     else:
         print("unsupported provider: ")
         print(provider)
@@ -435,43 +370,16 @@ def save_trans_setting(provider, app_id, app_key):
 
 
 def on_ui_tabs():
-    # get prompt textarea
-    # UI structure
-    # check modules/ui.py, search for txt2img_paste_fields
-    # Negative prompt is the second element
     txt2img_prompt = modules.ui.txt2img_paste_fields[0][0]
     txt2img_neg_prompt = modules.ui.txt2img_paste_fields[1][0]
     img2img_prompt = modules.ui.img2img_paste_fields[0][0]
     img2img_neg_prompt = modules.ui.img2img_paste_fields[1][0]
 
-    # ====Event's function====
     def set_provider(provider):
         app_id_visible = lang_config.trans_providers[provider]['has_id']
-        # set target language list
         tar_langs = [""]
         def_tar_lang = ""
-        # local translation model
-        if provider == "MarianMT":
-            # use language pair as tar_lang list
-            tar_langs = MarianMT_model_lang_pairs
-            # get default value
-            if len(MarianMT_model_lang_pairs):
-                # use "-en" model as default value
-                for lang_pair in MarianMT_model_lang_pairs:
-                    if lang_pair.endswith("-en"):
-                        def_tar_lang = lang_pair
-                        break
-
-                # if there is no "-en" model, use first one
-                if not def_tar_lang:
-                    def_tar_lang = MarianMT_model_lang_pairs[0]
-
-            # load model
-            if def_tar_lang:
-                load_MarianMT_model(def_tar_lang)
-
-        # cloud translation service
-        elif provider in lang_config.lang_code_dict.keys():
+        if provider in lang_config.lang_code_dict.keys():
             tar_langs = list(lang_config.lang_code_dict[provider].keys())
             def_tar_lang = tar_langs[0]
 
@@ -481,13 +389,10 @@ def on_ui_tabs():
 
     def tar_lang_changed(provider, tar_lang):
         if provider == "MarianMT":
-            # need to pre-load model
             if tar_lang:
-                load_MarianMT_model(tar_lang)
+                load_MarianMT_model(lang_config.lang_code_dict[provider][tar_lang])
 
     with gr.Blocks(analytics_enabled=False) as prompt_translator:
-        # ====ui====        
-        # Prompt Area
         with gr.Row():
             tar_lang_drop = gr.Dropdown(label="目标语言", choices=tar_langs, value=def_tar_lang,
                                         elem_id="pt_tar_lang")
@@ -497,8 +402,6 @@ def on_ui_tabs():
 
         with gr.Row():
             trans_prompt_btn = gr.Button(value="翻译", elem_id="pt_trans_prompt_btn")
-            # add a hidden button, used by fake click with javascript. To simulate msg between server and client side.
-            # this is the only way.
             trans_prompt_js_btn = gr.Button(value="Trans Js", visible=False, elem_id="pt_trans_prompt_js_btn")
             send_prompt_btn = gr.Button(value="发送到txt2img和img2img", elem_id="pt_send_prompt_btn")
 
@@ -509,14 +412,10 @@ def on_ui_tabs():
 
         with gr.Row():
             trans_neg_prompt_btn = gr.Button(value="翻译", elem_id="pt_trans_neg_prompt_btn")
-            # add a hidden button, used by fake click with javascript. To simulate msg between server and client side.
-            # this is the only way.
             trans_neg_prompt_js_btn = gr.Button(value="Trans Js", visible=False, elem_id="pt_trans_neg_prompt_js_btn")
             send_neg_prompt_btn = gr.Button(value="发送到txt2img和img2img", elem_id="pt_send_neg_prompt_btn")
 
         gr.HTML("<hr />")
-
-        # Translation Service Setting
 
         gr.Markdown("翻译服务设置")
         provider = gr.Dropdown(choices=providers, value=provider_name, label="服务", elem_id="pt_provider")
@@ -525,19 +424,14 @@ def on_ui_tabs():
                              elem_id="pt_app_key")
         save_trans_setting_btn = gr.Button(value="保存设置")
 
-        # deepl do not need appid
         app_id.visible = lang_config.trans_providers[provider_name]['has_id']
 
-        # ====events====
-        # Target languages
         tar_lang_drop.change(fn=tar_lang_changed, inputs=[provider, tar_lang_drop])
-        # Prompt
         trans_prompt_btn.click(do_trans, inputs=[provider, app_id, app_key, prompt, tar_lang_drop],
                                outputs=translated_prompt)
         trans_neg_prompt_btn.click(do_trans, inputs=[provider, app_id, app_key, neg_prompt, tar_lang_drop],
                                    outputs=translated_neg_prompt)
 
-        # Click by js
         trans_prompt_js_btn.click(do_trans_js, inputs=[provider, app_id, app_key, prompt, translated_neg_prompt],
                                   outputs=[translated_prompt, txt2img_prompt, img2img_prompt])
         trans_neg_prompt_js_btn.click(do_trans_js,
@@ -548,11 +442,9 @@ def on_ui_tabs():
         send_neg_prompt_btn.click(do_send_prompt, inputs=translated_neg_prompt,
                                   outputs=[txt2img_neg_prompt, img2img_neg_prompt])
 
-        # Translation Service Setting
         provider.change(fn=set_provider, inputs=provider, outputs=[app_id, app_key, tar_lang_drop])
         save_trans_setting_btn.click(save_trans_setting, inputs=[provider, app_id, app_key])
 
-    # the third parameter is the element id on html, with a "tab_" as prefix
     return (prompt_translator, "提示词翻译", "prompt_translator"),
 
 
