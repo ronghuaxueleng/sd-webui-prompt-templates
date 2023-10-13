@@ -13,78 +13,17 @@ import hashlib
 import json
 import modules
 from modules import script_callbacks
-from scripts.services import GoogleTranslationService
-import scripts.lang_code as lang_code
+import scripts.lang_config as lang_config
 from transformers import MarianMTModel, MarianTokenizer
 
-# Translation Service Providers
-trans_providers = {
-    "deepl": {
-        "url": "https://api-free.deepl.com/v2/translate",
-        "has_id": False
-    },
-    "baidu": {
-        "url": "https://fanyi-api.baidu.com/api/trans/vip/translate",
-        "has_id": True
-    },
-    "tencent": {
-        "url": "https://tmt.tencentcloudapi.com/?",
-        "has_id": True
-    },
-    "google": {
-        "url": "https://translation.googleapis.com",
-        "has_id": False
-    },
-    "yandex": {
-        "url": "https://translate.api.cloud.yandex.net/translate/v2/translate",
-        "has_id": True
-    },
-    "MarianMT": {
-        "url": "",
-        "has_id": False
-    }
-}
-
-# user's translation service setting
-trans_setting = {
-    "deepl": {
-        "is_default": False,
-        "app_id": "",
-        "app_key": ""
-    },
-    "baidu": {
-        "is_default": False,
-        "app_id": "",
-        "app_key": ""
-    },
-    "tencent": {
-        "is_default": True,
-        "app_id": "",
-        "app_key": ""
-    },
-    "google": {
-        "is_default": False,
-        "app_id": "",
-        "app_key": ""
-    },
-    "yandex": {
-        "is_default": False,
-        "app_id": "",
-        "app_key": ""
-    },
-    "MarianMT": {
-        "is_default": False,
-        "app_id": "",
-        "app_key": ""
-    }
-}
+trans_setting = lang_config.trans_setting
 
 # user config file
 # use scripts.basedir() to get current extension's folder
 config_file_name = os.path.join(scripts.basedir(), "prompt_translator.cfg")
 
 # scan MarianMT Model
-MarianMT_model_folder = os.path.join(scripts.basedir(), "MarianMT")
+MarianMT_model_folder = os.path.join(scripts.basedir(), "models")
 MarianMT_model_prefix = "opus-mt-"
 MarianMT_model_lang_pairs = []
 
@@ -121,8 +60,8 @@ def load_trans_setting():
 load_trans_setting()
 
 # get provider
-providers = list(trans_providers.keys())
-provider_name = "deepl"
+providers = list(lang_config.trans_providers.keys())
+provider_name = "tencent"
 for key in trans_setting.keys():
     if trans_setting[key]["is_default"]:
         provider_name = key
@@ -132,8 +71,8 @@ for key in trans_setting.keys():
 tar_langs = [""]
 def_tar_lang = ""
 if provider_name != "MarianMT":
-    if provider_name in lang_code.lang_code_dict.keys():
-        tar_langs = list(lang_code.lang_code_dict[provider_name].keys())
+    if provider_name in lang_config.lang_code_dict.keys():
+        tar_langs = list(lang_config.lang_code_dict[provider_name].keys())
         def_tar_lang = str(tar_langs[0])
 
 
@@ -207,130 +146,6 @@ if provider_name == "MarianMT":
         load_MarianMT_model(def_tar_lang)
 
 
-# deepl translator
-# refer: https://www.deepl.com/docs-api/translate-text/
-# parameter: app_key, text, target_language
-# return: translated_text
-def deepl_trans(app_key, text, tar_lang):
-    print("Getting data for deepl")
-    # check error
-    if not app_key:
-        print("app_key can not be empty")
-        return ""
-
-    if not text:
-        print("text can not be empty")
-        return ""
-
-    if not tar_lang:
-        tar_lang = "EN"
-
-    # set http request
-    headers = {"Authorization": "DeepL-Auth-Key " + app_key}
-    data = {
-        "text": text,
-        "target_lang": tar_lang
-    }
-
-    print("Sending request")
-    r = None
-    try:
-        r = requests.post(trans_providers["deepl"]["url"], data=data, headers=headers, timeout=10)
-    except Exception as e:
-        print("request get error, check your network")
-        print(str(e))
-        return ""
-
-    print("checking response")
-    # check error
-    # refer: https://www.deepl.com/docs-api/api-access/general-information/
-    if r.status_code >= 300 or r.status_code < 200:
-        print("Get Error code from DeepL: " + str(r.status_code))
-        if r.status_code == 429:
-            print("too many requests")
-        elif r.status_code == 456:
-            print("quota exceeded")
-        elif r.status_code >= 500:
-            print("temporary errors in the DeepL service")
-
-        print("check for more info: https://www.deepl.com/docs-api/api-access/general-information/")
-        return ""
-
-    # try to get content
-    content = None
-    try:
-        content = r.json()
-
-    except Exception as e:
-        print("Parse response json failed")
-        print(str(e))
-        print("response:")
-        print(r.text)
-        return ""
-
-    # try to get text from content
-    translated_text = ""
-    if content:
-        if "translations" in content.keys():
-            if len(["translations"]):
-                if "text" in content["translations"][0].keys():
-                    translated_text = content["translations"][0]["text"]
-
-    if not translated_text:
-        print("can not read tralstated text from response:")
-        print(r.text)
-        return ""
-
-    return translated_text
-
-
-# new srvice
-# yandex translator
-# refer: https://translate.api.cloud.yandex.net/translate/v2/translate
-# parameter: app_id, app_key, text, tar_lang
-# return: translated_text
-def yandex_trans(app_id, app_key, text, tar_lang):
-    target_language = 'en'
-    if tar_lang:
-        target_language = tar_lang
-
-    folder_id = app_id
-    texts = [text]
-    body = {
-        "targetLanguageCode": target_language,
-        "texts": texts,
-        "folderId": folder_id,
-    }
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer {0}".format(app_key)
-    }
-    response = requests.post('https://translate.api.cloud.yandex.net/translate/v2/translate',
-                             json=body,
-                             headers=headers
-                             )
-    translated_text = ""
-    translated_text = response.text
-    try:
-        content = response.json()
-
-    except Exception as e:
-        print("Parse response json failed")
-        print(str(e))
-        print("response:")
-        print(response.text)
-        return ""
-
-    # try to get text from content
-    translated_text = ""
-    if content:
-        if "translations" in content.keys():
-            if len(["translations"]):
-                if "text" in content["translations"][0].keys():
-                    translated_text = content["translations"][0]["text"]
-    return translated_text
-
-
 # baidu translator
 # refer: https://fanyi-api.baidu.com/doc/21
 # parameter: app_id, app_key, text, tar_lang
@@ -358,7 +173,7 @@ def baidu_trans(app_id, app_key, text, tar_lang):
     sign_str = app_id + text + salt + app_key
     sign_md5 = hashlib.md5(sign_str.encode("utf-8")).hexdigest()
 
-    request_link = trans_providers["baidu"][
+    request_link = lang_config.trans_providers["baidu"][
                        "url"] + "?q=" + text + "&from=auto&to=" + tar_lang + "&appid=" + app_id + "&salt=" + salt + "&sign=" + sign_md5
 
     print("Sending request")
@@ -473,7 +288,8 @@ def tencent_trans(secret_id, secret_key, text, tar_lang):
     if not tar_lang:
         tar_lang = 'en'
 
-    url_with_args = 'https://tmt.tencentcloudapi.com/?' + tencent_get_url_encoded_params(secret_id, secret_key, text,tar_lang)
+    url_with_args = 'https://tmt.tencentcloudapi.com/?' + tencent_get_url_encoded_params(secret_id, secret_key, text,
+                                                                                         tar_lang)
     try:
         res = requests.get(url_with_args, headers={
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'
@@ -544,23 +360,16 @@ def do_trans(provider, app_id, app_key, text, tar_lang):
 
     # get target language code
     tar_lang_code = ""
-    if provider in lang_code.lang_code_dict.keys():
-        if tar_lang in lang_code.lang_code_dict[provider].keys():
-            tar_lang_code = lang_code.lang_code_dict[provider][tar_lang]
+    if provider in lang_config.lang_code_dict.keys():
+        if tar_lang in lang_config.lang_code_dict[provider].keys():
+            tar_lang_code = lang_config.lang_code_dict[provider][tar_lang]
 
     # translating
     translated_text = ""
-    if provider == "deepl":
-        translated_text = deepl_trans(app_key, text, tar_lang_code)
-    elif provider == "baidu":
+    if provider == "baidu":
         translated_text = baidu_trans(app_id, app_key, text, tar_lang_code)
     elif provider == "tencent":
         translated_text = tencent_trans(app_id, app_key, text, tar_lang_code)
-    elif provider == "google":
-        service = GoogleTranslationService(app_key)
-        translated_text = service.translate(text=text, target=tar_lang_code)
-    elif provider == "yandex":
-        translated_text = yandex_trans(app_id, app_key, text, tar_lang_code)
     elif provider == "MarianMT":
         translated_text = MarianMT_trans(text, tar_lang)
     else:
@@ -573,11 +382,6 @@ def do_trans(provider, app_id, app_key, text, tar_lang):
     return translated_text
 
 
-# this is used when translating request is sending by js, not by a user's clicking
-# in this case, we need a return like below:
-# return: translated_text, translated_text, translated_text
-# return it 3 times to send result to 3 different textbox.
-# This is a hacking way to let txt2img and img2img get the translated result
 def do_trans_js(provider, app_id, app_key, text, tar_lang):
     print("Translating requested by js:")
 
@@ -592,13 +396,8 @@ def do_send_prompt(translated_text):
     return [translated_text, translated_text]
 
 
-# save translation service setting
-# parameter: provider, app_id, app_key
-# return:
-# trans_setting: a parsed json object as python dict with same structure as globel trans_setting object
 def save_trans_setting(provider, app_id, app_key):
     print("Saving tranlation service setting...")
-    # write data into globel trans_setting
     global trans_setting
 
     # check error
@@ -647,7 +446,7 @@ def on_ui_tabs():
 
     # ====Event's function====
     def set_provider(provider):
-        app_id_visible = trans_providers[provider]['has_id']
+        app_id_visible = lang_config.trans_providers[provider]['has_id']
         # set target language list
         tar_langs = [""]
         def_tar_lang = ""
@@ -672,8 +471,8 @@ def on_ui_tabs():
                 load_MarianMT_model(def_tar_lang)
 
         # cloud translation service
-        elif provider in lang_code.lang_code_dict.keys():
-            tar_langs = list(lang_code.lang_code_dict[provider].keys())
+        elif provider in lang_config.lang_code_dict.keys():
+            tar_langs = list(lang_config.lang_code_dict[provider].keys())
             def_tar_lang = tar_langs[0]
 
         return [app_id.update(visible=app_id_visible, value=trans_setting[provider]["app_id"]),
@@ -727,7 +526,7 @@ def on_ui_tabs():
         save_trans_setting_btn = gr.Button(value="保存设置")
 
         # deepl do not need appid
-        app_id.visible = trans_providers[provider_name]['has_id']
+        app_id.visible = lang_config.trans_providers[provider_name]['has_id']
 
         # ====events====
         # Target languages
