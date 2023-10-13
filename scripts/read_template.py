@@ -9,8 +9,9 @@ import time
 import gradio as gr
 from PIL import UnidentifiedImageError
 
-from scripts.jishui.utils import make_thumb
 from scripts.jishui.db import Template
+from scripts.jishui.utils import make_thumb
+from scripts.jishui.translator import translator
 from modules import scripts, script_callbacks, ui, generation_parameters_copypaste, images
 
 base_dir = scripts.basedir()
@@ -53,8 +54,12 @@ def load_template_list(show_translate_colum):
                         </div>
                         """
                     temp_list.append(preview_img)
-                    temp_list.append(templateObj.prompt)
-                    temp_list.append(templateObj.negativePrompt)
+                    if show_translate_colum:
+                        temp_list.append(templateObj.prompt + "\n" + translator.translate(templateObj.prompt))
+                        temp_list.append(templateObj.negativePrompt + "\n" + translator.translate(templateObj.negativePrompt))
+                    else:
+                        temp_list.append(templateObj.prompt)
+                        temp_list.append(templateObj.negativePrompt)
                     raw_encode = base64.b64encode(templateObj.raw.encode("utf-8")).decode('utf-8')
                     jump_to_detail_onclick = f'''jump_to_detail("{raw_encode}", "{templateObj.filename}")'''
                     prompt_send_to_txt2img_onclick = f'''prompt_send_to_txt2img("{raw_encode}")'''
@@ -342,6 +347,9 @@ def add_tab():
             detail_text_btn.click(fn=show_detail, inputs=[detail_text, prompt_detail_filename_text],
                                   outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img])
             refrash_list_btn.click(fn=refrash_list, inputs=show_translate_colum_checkbox, outputs=datatable)
+
+            show_translate_colum_checkbox.change(fn=refrash_list, inputs=show_translate_colum_checkbox, outputs=datatable)
+
             delete_invalid_pre_image_btn.click(fn=delete_invalid_pre_image, _js="function(){alert('清理完毕');}")
 
             generation_parameters_copypaste.register_paste_params_button(generation_parameters_copypaste.ParamBinding(
