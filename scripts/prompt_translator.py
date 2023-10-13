@@ -29,7 +29,7 @@ active_MarianMT_tokenizer_dict = {}
 def load_trans_setting():
     if not os.path.isfile(config_file_name):
         print("没有发现配置文件: " + config_file_name)
-        return
+        return lang_config.trans_setting
 
     with open(config_file_name, 'r') as f:
         trans_setting = json.load(f)
@@ -43,9 +43,10 @@ def load_trans_setting():
         if key not in trans_setting.keys():
             trans_setting[key] = lang_config.trans_setting[key]
             print("无效的配置【 " + key + "】，使用默认配置")
+    return trans_setting
 
 
-load_trans_setting()
+trans_setting = load_trans_setting()
 
 providers = list(lang_config.trans_providers.keys())
 provider_name = "MarianMT"
