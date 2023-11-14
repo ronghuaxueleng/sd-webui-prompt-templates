@@ -5,16 +5,19 @@ import launch
 from modules import scripts
 
 pkgs = [
-    {"peewee": "peewee"}
+    "peewee",
+    ### for deduplicate ###
+    "toml",
+    "imagededup",
 ]
 
 for pkg in pkgs:
-    key, val = next(iter(pkg.items()))
-    if not launch.is_installed(key):
-        launch.run_pip(f'install {val}', "requirements for sd-webui-prompt-templates")
+    if not launch.is_installed(pkg):
+        launch.run_pip(f'install {pkg}', "requirements for sd-webui-prompt-templates")
 
 base_dir = scripts.basedir()
 template_path = pathlib.Path(base_dir + '/template.db')
 if not template_path.exists():
-    from scripts.jishui.db import init_table
+    from jishui.db import init_table
+
     init_table()

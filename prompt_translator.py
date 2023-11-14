@@ -13,7 +13,7 @@ import hashlib
 import json
 import modules
 from modules import script_callbacks
-import scripts.lang_config as lang_config
+import lang_config as lang_config
 from transformers import MarianMTModel, MarianTokenizer
 
 trans_setting = {}

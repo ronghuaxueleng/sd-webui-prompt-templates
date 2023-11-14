@@ -9,10 +9,10 @@ import time
 import gradio as gr
 from PIL import UnidentifiedImageError
 
-from scripts.jishui.db import Template
-from scripts.jishui.utils import make_thumb
-from scripts.jishui.translator import translator
-from modules import scripts, script_callbacks, ui, generation_parameters_copypaste, images
+from jishui.db import Template
+from jishui.utils import make_thumb
+from jishui.translator import translator
+from modules import scripts, ui, generation_parameters_copypaste, images
 
 base_dir = scripts.basedir()
 pics_dir_path = base_dir + r"/pics"
@@ -56,7 +56,8 @@ def load_template_list(show_translate_colum):
                     temp_list.append(preview_img)
                     if show_translate_colum:
                         temp_list.append(templateObj.prompt + "\n" + translator.translate(templateObj.prompt))
-                        temp_list.append(templateObj.negativePrompt + "\n" + translator.translate(templateObj.negativePrompt))
+                        temp_list.append(
+                            templateObj.negativePrompt + "\n" + translator.translate(templateObj.negativePrompt))
                     else:
                         temp_list.append(templateObj.prompt)
                         temp_list.append(templateObj.negativePrompt)
@@ -271,7 +272,7 @@ def save_all_flow_to_template():
     pass
 
 
-def add_tab():
+def create_ui() -> gr.Blocks:
     with gr.Blocks(analytics_enabled=False) as tab:
         save_all_flow_to_template_btn = gr.Button(elem_id='save_flow_to_template_btn', visible=False)
         template_id = gr.TextArea(elem_id='template_id', visible=False)
@@ -348,7 +349,8 @@ def add_tab():
                                   outputs=[detail_info, send_detail_to_txt2img, send_detail_to_img2img])
             refrash_list_btn.click(fn=refrash_list, inputs=show_translate_colum_checkbox, outputs=datatable)
 
-            show_translate_colum_checkbox.change(fn=refrash_list, inputs=show_translate_colum_checkbox, outputs=datatable)
+            show_translate_colum_checkbox.change(fn=refrash_list, inputs=show_translate_colum_checkbox,
+                                                 outputs=datatable)
 
             delete_invalid_pre_image_btn.click(fn=delete_invalid_pre_image, _js="function(){alert('清理完毕');}")
 
@@ -378,7 +380,4 @@ def add_tab():
 
         save_all_flow_to_template_btn.click(fn=save_all_flow_to_template)
 
-    return [(tab, "提示词模版", "prompt_template")]
-
-
-script_callbacks.on_ui_tabs(add_tab)
+    return tab
