@@ -9,6 +9,10 @@ pkgs = [
     ### for deduplicate ###
     "toml",
     "imagededup",
+    ### for tagger ###
+    "huggingface_hub",
+    "\"opencv-python>=4.7.0.68\"",
+    "onnxruntime-gpu",
 ]
 
 for pkg in pkgs:

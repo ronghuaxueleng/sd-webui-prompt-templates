@@ -365,7 +365,7 @@ def save_trans_setting(provider, app_id, app_key):
     print("config saved to: " + config_file_name)
 
 
-def on_ui_tabs():
+def create_ui() -> gr.Blocks:
     txt2img_prompt = modules.ui.txt2img_paste_fields[0][0]
     txt2img_neg_prompt = modules.ui.txt2img_paste_fields[1][0]
     img2img_prompt = modules.ui.img2img_paste_fields[0][0]
@@ -441,7 +441,6 @@ def on_ui_tabs():
         provider.change(fn=set_provider, inputs=provider, outputs=[app_id, app_key, tar_lang_drop])
         save_trans_setting_btn.click(save_trans_setting, inputs=[provider, app_id, app_key])
 
-    return (prompt_translator, "提示词翻译", "prompt_translator"),
+    return prompt_translator
 
 
-script_callbacks.on_ui_tabs(on_ui_tabs)
