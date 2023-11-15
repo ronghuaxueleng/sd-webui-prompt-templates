@@ -172,7 +172,7 @@ def create_ui() -> gr.Blocks:
                     with gr.Row():
                         gr.HTML(KEYBOARD_SHORTCUT_TIPS_HTML, elem_id=KEYBOARD_SHORTCUT_TIPS_HTML_ELEM_ID)
                     with gr.Row():
-                        duplicates_images_gallery = gr.Gallery(label="重复图片", value=[], elem_id=DUPLICATES_IMAGES_GALLERY_ELEM_ID).style(columns=6, height="auto", preview=False)
+                        duplicates_images_gallery = gr.Gallery(label="重复图片", value=[], elem_id=DUPLICATES_IMAGES_GALLERY_ELEM_ID, columns=6, preview=False)
                     with gr.Row():
                         confirm_button = gr.Button(f"选择图片 [{CONFIRM_KEYBORAD_KEY}]", elem_id=CONFIRM_BUTTON_ELEM_ID)
                         cancel_button = gr.Button(f"取消图片 [{CANCEL_KEYBORAD_KEY}]", elem_id=CANCEL_BUTTON_ELEM_ID)
