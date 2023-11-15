@@ -17,7 +17,7 @@ pkgs = [
 
 for pkg in pkgs:
     if not launch.is_installed(pkg):
-        launch.run_pip(f'install {pkg}', "requirements for sd-webui-prompt-templates")
+        launch.run_pip(f'install {pkg}', f"install {pkg} for sd-webui-prompt-templates")
 
 base_dir = scripts.basedir()
 template_path = pathlib.Path(base_dir + '/template.db')
