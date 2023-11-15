@@ -43,7 +43,7 @@ css = """
 .attention {color: red  !important}
 .recommendation {color: dodgerblue !important}
 """
-blocks_name = "Deduplicate"
+blocks_name = "图片去重"
 
 ELEM_ID_PREFIX = f"{js.ELEM_ID_PREFIX}{blocks_name}_"
 
