@@ -273,6 +273,11 @@ def save_all_flow_to_template():
 
 
 def create_ui() -> gr.Blocks:
+    template_path = pathlib.Path(base_dir + '/template.db')
+    if not template_path.exists():
+        from jishui.db import init_table
+
+        init_table()
     with gr.Blocks(analytics_enabled=False) as tab:
         save_all_flow_to_template_btn = gr.Button(elem_id='save_flow_to_template_btn', visible=False)
         template_id = gr.TextArea(elem_id='template_id', visible=False)
